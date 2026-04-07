@@ -15,43 +15,18 @@ public class Connection {
     @Getter
     private final String id;
 
-    private final BlockingQueue<Message> buffer;
-
     @Getter
     @Setter
     private InputPort target;
 
     public static Connection create(String id) {
-        return create(id, 10);
-    }
-
-    public static Connection create(String id, int bufferSize) {
         return new Connection(
                 id,
-                new LinkedBlockingQueue<>(bufferSize),
                 null
         );
     }
 
     public void deliver(Message message) {
-        try {
-            buffer.put(message);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    public Message poll() {
-        try {
-            return buffer.take();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        return null;
-    }
-
-    public int getBufferSize() {
-        return buffer.size();
+        target.receive(message);
     }
 }

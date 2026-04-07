@@ -11,6 +11,8 @@ import com.nhnacademy.fbp.core.port.exception.OutputPortNotFoundException;
 import lombok.Getter;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Getter
 public class Flow {
@@ -20,6 +22,7 @@ public class Flow {
     private final String id;
     private final Map<String, AbstractNode> nodes;
     private final List<Connection> connections;
+    private final ExecutorService executorService;
     private FlowState state;
 
     private Flow(String id) {
@@ -28,6 +31,7 @@ public class Flow {
 
         nodes = new HashMap<>();
         connections = new ArrayList<>();
+        executorService = Executors.newVirtualThreadPerTaskExecutor();
     }
 
     public static Flow create(String id) {
@@ -74,11 +78,15 @@ public class Flow {
     public void initialize() {
         nodes.values().forEach(AbstractNode::initialize);
 
+        nodes.values().forEach(executorService::submit);
+
         state = FlowState.RUNNING;
     }
 
     public void shutdown() {
         nodes.values().forEach(AbstractNode::shutdown);
+
+        executorService.shutdown();
 
         state = FlowState.STOPPED;
     }

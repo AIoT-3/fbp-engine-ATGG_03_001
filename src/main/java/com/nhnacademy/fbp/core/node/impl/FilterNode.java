@@ -22,9 +22,9 @@ public class FilterNode extends AbstractNode {
 
     @Override
     protected void onProcess(Message message) {
-        Double value = message.getPayload(key);
+        Number value = message.getPayload(key);
 
-        if (value != null && value > threshold) {
+        if (value != null && value.doubleValue() > threshold) {
             send("out", message);
         }
     }

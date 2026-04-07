@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Slf4j
 @Getter
-public abstract class AbstractNode implements Node {
+public abstract class AbstractNode implements Node, Runnable {
     private final String id;
     private final Map<String, InputPort> inputPorts;
     private final Map<String, OutputPort> outputPorts;
@@ -28,7 +28,6 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public void process(Message message) {
-        log.info("[{}] processing message...", id);
         onProcess(message);
     }
 
@@ -52,11 +51,32 @@ public abstract class AbstractNode implements Node {
         return outputPorts.get(name);
     }
 
+    protected Message poll(String name) throws InterruptedException {
+        return inputPorts.get(name).poll();
+    }
+
     protected void send(String portName, Message message) {
         OutputPort target = outputPorts.get(portName);
 
         if (target != null) {
             target.send(message);
+        }
+    }
+
+    @Override
+    public void run() {
+        InputPort in = getInputPort("in");
+
+        if (in != null) {
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    Message message = in.poll();
+
+                    process(message);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

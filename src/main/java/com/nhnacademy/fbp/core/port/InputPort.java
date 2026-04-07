@@ -7,4 +7,6 @@ public interface InputPort {
     void receive(Message message);
     String getName();
     AbstractNode getOwner();
+    Message poll() throws InterruptedException;
+    int getBufferSize();
 }

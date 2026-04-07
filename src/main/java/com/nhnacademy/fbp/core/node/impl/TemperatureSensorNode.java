@@ -34,4 +34,18 @@ public class TemperatureSensorNode extends AbstractNode {
 
         send("out", created);
     }
+
+    @Override
+    public void run() {
+        try {
+            while (!Thread.currentThread().isInterrupted()) {
+                Message message = poll("trigger");
+
+                process(message);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
 }
