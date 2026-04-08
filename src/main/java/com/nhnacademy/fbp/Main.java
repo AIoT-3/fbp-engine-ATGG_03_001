@@ -2,12 +2,15 @@ package com.nhnacademy.fbp;
 
 import com.nhnacademy.fbp.core.engine.FlowEngine;
 import com.nhnacademy.fbp.core.flow.Flow;
+import com.nhnacademy.fbp.node.mqtt.MqttSubscriberNode;
 import com.nhnacademy.fbp.node.standard.*;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.paho.mqttv5.common.MqttException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.UUID;
 
 @Slf4j
 public class Main {
@@ -18,6 +21,7 @@ public class Main {
 
         initFlow1();
         initFlow2();
+        initFlow3();
 
         while (true) {
             System.out.print("fbp> ");
@@ -59,6 +63,20 @@ public class Main {
                 .connect("log", "file");
 
         engine.register(flow);
+    }
+
+    private static void initFlow3() {
+        try {
+            Flow flow = Flow.create("mqtt-test")
+                    .addNode(MqttSubscriberNode.create("mqtt", "tcp://localhost:1883", "sensor"))
+                    .addNode(LogNode.create("log"));
+
+            flow.connect("mqtt", "log");
+
+            engine.register(flow);
+        } catch (MqttException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void execute(String input) {

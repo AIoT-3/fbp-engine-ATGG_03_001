@@ -31,7 +31,7 @@ public class Flow {
 
         nodes = new HashMap<>();
         connections = new ArrayList<>();
-        executorService = Executors.newVirtualThreadPerTaskExecutor();
+        executorService = Executors.newFixedThreadPool(10);
     }
 
     public static Flow create(String id) {
