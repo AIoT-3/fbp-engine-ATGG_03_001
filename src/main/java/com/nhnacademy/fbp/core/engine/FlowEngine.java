@@ -56,16 +56,12 @@ public class FlowEngine {
         log.info("[Engine] 엔진 종료됨.");
     }
 
-    public void listFlows() {
+    public List<String> listFlows() {
         List<Flow> flowList = new ArrayList<>(flows.values());
 
-        for (int i = 0; i < flows.size(); i++) {
-            Flow flow = flowList.get(i);
-
-            String out = String.format("[%d] %s %s", i+1, flow.getId(), flow.getState());
-
-            System.out.println(out);
-        }
+        return flowList.stream()
+                .map(flow -> String.format("[%d] %s %s", flowList.indexOf(flow) + 1, flow.getId(), flow.getState()))
+                .toList();
     }
 
     private Flow getFlow(String flowId) {
