@@ -1,11 +1,9 @@
-package com.nhnacademy.fbp.core.port;
+package com.nhnacademy.fbp.core.port.impl;
 
 import com.nhnacademy.fbp.core.messsage.Message;
 import com.nhnacademy.fbp.core.node.AbstractNode;
-import com.nhnacademy.fbp.core.node.Node;
-import lombok.AccessLevel;
+import com.nhnacademy.fbp.core.port.InputPort;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -23,7 +21,11 @@ public class DefaultInputPort implements InputPort {
     }
 
     public static DefaultInputPort create(String name, AbstractNode owner) {
-        return new DefaultInputPort(name, owner, 10);
+        return create(name, owner, 10);
+    }
+
+    public static DefaultInputPort create(String name, AbstractNode owner, int bufferSize) {
+        return new DefaultInputPort(name, owner, bufferSize);
     }
 
     @Override
