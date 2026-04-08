@@ -25,7 +25,7 @@ class LogNodeTest {
         logNode.process(message);
 
         // then
-        Message found = inputPort.poll();
+        Message found = inputPort.take();
 
         assertThat(found)
                 .isNotNull()

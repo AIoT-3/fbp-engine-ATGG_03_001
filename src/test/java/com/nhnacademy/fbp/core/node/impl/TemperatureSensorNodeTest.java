@@ -28,7 +28,7 @@ class TemperatureSensorNodeTest {
         node.process(Message.create());
 
         // then
-        Message found = nextInputPort.poll();
+        Message found = nextInputPort.take();
 
         assertThat(found)
                 .isNotNull()
@@ -50,7 +50,7 @@ class TemperatureSensorNodeTest {
         node.process(Message.create());
 
         // then
-        Message found = nextInputPort.poll();
+        Message found = nextInputPort.take();
 
         assertThat(found)
                 .isNotNull()
@@ -74,7 +74,7 @@ class TemperatureSensorNodeTest {
         node.process(Message.create());
 
         // then
-        Message found = nextInputPort.poll();
+        Message found = nextInputPort.take();
 
         assertThat(found)
                 .isNotNull()

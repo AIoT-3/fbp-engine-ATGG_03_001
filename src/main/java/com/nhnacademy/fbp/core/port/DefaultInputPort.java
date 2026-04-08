@@ -36,7 +36,7 @@ public class DefaultInputPort implements InputPort {
     }
 
     @Override
-    public Message poll() throws InterruptedException {
+    public Message take() throws InterruptedException {
         return buffer.take();
     }
 

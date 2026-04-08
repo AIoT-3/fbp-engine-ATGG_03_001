@@ -39,8 +39,8 @@ class SplitNodeTest {
         assertThat(mismatchNextInputPort.getBufferSize())
                 .isEqualTo(1);
 
-        Message matchFound = matchNextInputPort.poll();
-        Message mismatchFound = mismatchNextInputPort.poll();
+        Message matchFound = matchNextInputPort.take();
+        Message mismatchFound = mismatchNextInputPort.take();
 
         assertThat(matchFound)
                 .isNotNull()
@@ -75,7 +75,7 @@ class SplitNodeTest {
         assertThat(matchNextInputPort.getBufferSize())
                 .isEqualTo(1);
 
-        Message found = matchNextInputPort.poll();
+        Message found = matchNextInputPort.take();
 
         assertThat(found)
                 .isNotNull()

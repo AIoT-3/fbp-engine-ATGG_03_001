@@ -23,7 +23,7 @@ class ConnectionTest {
         Message message = Message.create();
         connection.deliver(message);
 
-        Message found = nextInputPort.poll();
+        Message found = nextInputPort.take();
 
         // then
         assertThat(found)
@@ -48,9 +48,9 @@ class ConnectionTest {
         connection.deliver(message3);
 
         // when
-        Message found1 = nextInputPort.poll();
-        Message found2 = nextInputPort.poll();
-        Message found3 = nextInputPort.poll();
+        Message found1 = nextInputPort.take();
+        Message found2 = nextInputPort.take();
+        Message found3 = nextInputPort.take();
 
         // then
         assertThat(found1)

@@ -39,7 +39,7 @@ public class TemperatureSensorNode extends AbstractNode {
     public void run() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
-                Message message = poll("trigger");
+                Message message = takeMessage("trigger");
 
                 process(message);
             }

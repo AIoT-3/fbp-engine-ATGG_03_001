@@ -41,7 +41,7 @@ class TransFormNodeTest {
         // when
         transformNode.process(message);
 
-        Message found = nextInputPort.poll();
+        Message found = nextInputPort.take();
 
         // then
         assertThat(found)

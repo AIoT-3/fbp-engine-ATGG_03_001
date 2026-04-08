@@ -23,7 +23,7 @@ class DefaultOutputPortTest {
         // when
         outputPort.send(message);
 
-        Message found = nextInputPort.poll();
+        Message found = nextInputPort.take();
 
         // then
         assertThat(found)
@@ -44,8 +44,8 @@ class DefaultOutputPortTest {
         // when
         outputPort.send(message);
 
-        Message found1 = nextInputPort1.poll();
-        Message found2 = nextInputPort2.poll();
+        Message found1 = nextInputPort1.take();
+        Message found2 = nextInputPort2.take();
 
         // then
         assertSoftly(softly -> {

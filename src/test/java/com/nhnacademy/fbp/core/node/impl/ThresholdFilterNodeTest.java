@@ -31,7 +31,7 @@ class ThresholdFilterNodeTest {
         assertThat(nextInputPort.getBufferSize())
                 .isEqualTo(1);
 
-        Message found = nextInputPort.poll();
+        Message found = nextInputPort.take();
 
         assertThat(found)
                 .isNotNull()
@@ -57,7 +57,7 @@ class ThresholdFilterNodeTest {
         assertThat(nextInputPort.getBufferSize())
                 .isEqualTo(1);
 
-        Message found = nextInputPort.poll();
+        Message found = nextInputPort.take();
 
         assertThat(found)
                 .isNotNull()
@@ -84,7 +84,7 @@ class ThresholdFilterNodeTest {
         assertThat(nextInputPort.getBufferSize())
                 .isEqualTo(1);
 
-        Message found = nextInputPort.poll();
+        Message found = nextInputPort.take();
 
         assertThat(found)
                 .isNotNull()

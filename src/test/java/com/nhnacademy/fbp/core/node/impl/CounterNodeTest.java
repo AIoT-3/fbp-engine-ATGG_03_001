@@ -46,10 +46,10 @@ class CounterNodeTest {
         assertThat(inputPort.getBufferSize())
                 .isEqualTo(3);
 
-        inputPort.poll();
-        inputPort.poll();
+        inputPort.take();
+        inputPort.take();
 
-        Message found = inputPort.poll();
+        Message found = inputPort.take();
 
         assertThat(found)
                 .isNotNull()

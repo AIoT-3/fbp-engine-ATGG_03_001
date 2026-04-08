@@ -51,8 +51,8 @@ public abstract class AbstractNode implements Node, Runnable {
         return outputPorts.get(name);
     }
 
-    protected Message poll(String name) throws InterruptedException {
-        return inputPorts.get(name).poll();
+    protected Message takeMessage(String inputPortName) throws InterruptedException {
+        return inputPorts.get(inputPortName).take();
     }
 
     protected void send(String portName, Message message) {
@@ -70,7 +70,7 @@ public abstract class AbstractNode implements Node, Runnable {
         if (in != null) {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
-                    Message message = in.poll();
+                    Message message = in.take();
 
                     process(message);
                 }

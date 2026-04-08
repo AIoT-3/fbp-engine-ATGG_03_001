@@ -1,6 +1,5 @@
 package com.nhnacademy.fbp.core.node.impl;
 
-import com.nhnacademy.fbp.core.connection.Connection;
 import com.nhnacademy.fbp.core.messsage.Message;
 import com.nhnacademy.fbp.core.node.AbstractNode;
 import com.nhnacademy.fbp.core.port.InputPort;
@@ -25,7 +24,7 @@ class TimerNodeTest {
         // when
         timerNode.initialize();
 
-        Message found = nextInputPort.poll();
+        Message found = nextInputPort.take();
 
         // then
         assertThat(found)
@@ -44,9 +43,9 @@ class TimerNodeTest {
 
         timerNode.initialize();
 
-        Message found1 = nextInputPort.poll();
+        Message found1 = nextInputPort.take();
         Thread.sleep(1000);
-        Message found2 = nextInputPort.poll();
+        Message found2 = nextInputPort.take();
 
         // then
         assertSoftly(softly -> {

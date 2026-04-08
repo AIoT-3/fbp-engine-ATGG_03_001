@@ -59,7 +59,7 @@ class FilterNodeTest {
         assertThat(receiveCount)
                 .isEqualTo(1);
 
-        Message found = inputPort.poll();
+        Message found = inputPort.take();
 
         assertThat(found)
                 .isNotNull()

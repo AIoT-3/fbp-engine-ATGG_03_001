@@ -21,15 +21,15 @@ class DefaultInputPortTest {
         inputPort.receive(message);
 
         // then
-        Message found = inputPort.poll();
+        Message found = inputPort.take();
         assertThat(found)
                 .isNotNull()
                 .isEqualTo(message);
     }
 
     @Test
-    @DisplayName("다른 스레드에서 메시지를 수신한 메시지를 poll()로 꺼낼 수 있다.")
-    void receive_WhenMessageReceivedFromAnotherThread_PollReturnsMessage() throws InterruptedException {
+    @DisplayName("다른 스레드에서 메시지를 수신한 메시지를 take()로 꺼낼 수 있다.")
+    void receive_WhenMessageReceivedFromAnotherThread_takeReturnsMessage() throws InterruptedException {
         // given
         DefaultInputPort inputPort = DefaultInputPort.create("test", null);
         Message message = Message.create();
@@ -43,15 +43,15 @@ class DefaultInputPortTest {
         receiverThread.join();
 
         // then
-        Message found = inputPort.poll();
+        Message found = inputPort.take();
         assertThat(found)
                 .isNotNull()
                 .isEqualTo(message);
     }
 
     @Test
-    @DisplayName("비어 있는 버퍼에서 poll()을 호출한 스레드는 메시지가 수신될 때까지 대기한다.")
-    void poll_WhenBufferEmpty_WaitsThreads() throws InterruptedException {
+    @DisplayName("비어 있는 버퍼에서 take()을 호출한 스레드는 메시지가 수신될 때까지 대기한다.")
+    void take_WhenBufferEmpty_WaitsThreads() throws InterruptedException {
         // given
         DefaultInputPort inputPort = DefaultInputPort.create("test", null);
         Message message = Message.create();
@@ -61,7 +61,7 @@ class DefaultInputPortTest {
 
         new Thread(() -> {
             try {
-                inputPort.poll();
+                inputPort.take();
                 latch.countDown();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
