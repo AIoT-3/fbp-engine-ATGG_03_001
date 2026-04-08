@@ -1,8 +1,9 @@
 package com.nhnacademy.fbp.core.node.impl;
 
-import com.nhnacademy.fbp.core.connection.Connection;
 import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
+import com.nhnacademy.fbp.core.utils.FbpTestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,13 +31,11 @@ class CounterNodeTest {
 
     @Test
     @DisplayName("메시지가 처리될 때 페이로드에 'count' 키로 현재 카운터 값이 포함된다.")
-    void process_WhenCalled_MessageContainsCurrentCount() {
+    void process_WhenCalled_MessageContainsCurrentCount() throws InterruptedException {
         // given
         CounterNode counterNode = CounterNode.create("test");
         OutputPort outputPort = counterNode.getOutputPort("out");
-        Connection connection = Connection.create("test");
-
-        outputPort.connect(connection);
+        InputPort inputPort = FbpTestUtils.getConnectedInputPort(outputPort);
 
         // when
         for (int i = 0; i < 3; i++) {
@@ -44,13 +43,13 @@ class CounterNodeTest {
         }
 
         // then
-        assertThat(connection.getBufferSize())
+        assertThat(inputPort.getBufferSize())
                 .isEqualTo(3);
 
-        connection.poll();
-        connection.poll();
+        inputPort.poll();
+        inputPort.poll();
 
-        Message found = connection.poll();
+        Message found = inputPort.poll();
 
         assertThat(found)
                 .isNotNull()

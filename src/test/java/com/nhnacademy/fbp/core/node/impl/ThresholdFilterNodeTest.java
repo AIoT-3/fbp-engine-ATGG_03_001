@@ -1,8 +1,9 @@
 package com.nhnacademy.fbp.core.node.impl;
 
-import com.nhnacademy.fbp.core.connection.Connection;
 import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
+import com.nhnacademy.fbp.core.utils.FbpTestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,13 +14,11 @@ class ThresholdFilterNodeTest {
 
     @Test
     @DisplayName("임계값을 초과하는 메시지를 처리하면, 'alert' 포트로 전달된다.")
-    void process_WhenExceedsThreshold_SendToAlertPort() {
+    void process_WhenExceedsThreshold_SendToAlertPort() throws InterruptedException {
         // given
         ThresholdFilterNode node = ThresholdFilterNode.create("test", "temperature", 30);
-        OutputPort alertOutputPort = node.getOutputPort("alert");
-        Connection connection = Connection.create("test");
-
-        alertOutputPort.connect(connection);
+        OutputPort outputPort = node.getOutputPort("alert");
+        InputPort nextInputPort = FbpTestUtils.getConnectedInputPort(outputPort);
 
         double temperature = 35.0;
         Message message = Message.create()
@@ -29,10 +28,10 @@ class ThresholdFilterNodeTest {
         node.process(message);
 
         // then
-        assertThat(connection.getBufferSize())
+        assertThat(nextInputPort.getBufferSize())
                 .isEqualTo(1);
 
-        Message found = connection.poll();
+        Message found = nextInputPort.poll();
 
         assertThat(found)
                 .isNotNull()
@@ -41,13 +40,11 @@ class ThresholdFilterNodeTest {
 
     @Test
     @DisplayName("임계값 이하인 메시지를 처리하면, 'normal' 포트로 전달된다.")
-    void process_WhenBelowThreshold_SendToNormalPort() {
+    void process_WhenBelowThreshold_SendToNormalPort() throws InterruptedException {
         // given
         ThresholdFilterNode node = ThresholdFilterNode.create("test", "temperature", 30);
-        OutputPort normalOutputPort = node.getOutputPort("normal");
-        Connection connection = Connection.create("test");
-
-        normalOutputPort.connect(connection);
+        OutputPort outputPort = node.getOutputPort("normal");
+        InputPort nextInputPort = FbpTestUtils.getConnectedInputPort(outputPort);
 
         double temperature = 20;
         Message message = Message.create()
@@ -57,10 +54,10 @@ class ThresholdFilterNodeTest {
         node.process(message);
 
         // then
-        assertThat(connection.getBufferSize())
+        assertThat(nextInputPort.getBufferSize())
                 .isEqualTo(1);
 
-        Message found = connection.poll();
+        Message found = nextInputPort.poll();
 
         assertThat(found)
                 .isNotNull()
@@ -69,14 +66,13 @@ class ThresholdFilterNodeTest {
 
     @Test
     @DisplayName("임계값과 동일한 메시지를 처리하면, 'normal' 포트로 전달된다.")
-    void process_WhenEqualThreshold_SendToNormalPort() {
+    void process_WhenEqualThreshold_SendToNormalPort() throws InterruptedException {
         // given
         double threshold = 30;
-        ThresholdFilterNode node = ThresholdFilterNode.create("test", "temperature", threshold);
-        OutputPort normalOutputPort = node.getOutputPort("normal");
-        Connection connection = Connection.create("test");
 
-        normalOutputPort.connect(connection);
+        ThresholdFilterNode node = ThresholdFilterNode.create("test", "temperature", threshold);
+        OutputPort outputPort = node.getOutputPort("normal");
+        InputPort nextInputPort = FbpTestUtils.getConnectedInputPort(outputPort);
 
         Message message = Message.create()
                 .withEntry("temperature", threshold);
@@ -85,10 +81,10 @@ class ThresholdFilterNodeTest {
         node.process(message);
 
         // then
-        assertThat(connection.getBufferSize())
+        assertThat(nextInputPort.getBufferSize())
                 .isEqualTo(1);
 
-        Message found = connection.poll();
+        Message found = nextInputPort.poll();
 
         assertThat(found)
                 .isNotNull()
@@ -102,11 +98,8 @@ class ThresholdFilterNodeTest {
         ThresholdFilterNode node = ThresholdFilterNode.create("test", "temperature", 30);
         OutputPort alertOutputPort = node.getOutputPort("alert");
         OutputPort normalOutputPort = node.getOutputPort("normal");
-        Connection alertConnection = Connection.create("test");
-        Connection normalConnection = Connection.create("test");
-
-        alertOutputPort.connect(alertConnection);
-        normalOutputPort.connect(normalConnection);
+        InputPort alertNextInputPort = FbpTestUtils.getConnectedInputPort(alertOutputPort);
+        InputPort normalNextInputPort = FbpTestUtils.getConnectedInputPort(normalOutputPort);
 
         Message message = Message.create()
                 .withEntry("humidity", 50);
@@ -114,9 +107,9 @@ class ThresholdFilterNodeTest {
         // when & then
         assertDoesNotThrow(() -> node.process(message));
 
-        assertThat(alertConnection.getBufferSize())
+        assertThat(alertNextInputPort.getBufferSize())
                 .isZero();
-        assertThat(normalConnection.getBufferSize())
+        assertThat(normalNextInputPort.getBufferSize())
                 .isZero();
     }
 }

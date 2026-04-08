@@ -1,8 +1,9 @@
 package com.nhnacademy.fbp.core.node.impl;
 
-import com.nhnacademy.fbp.core.connection.Connection;
 import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
+import com.nhnacademy.fbp.core.utils.FbpTestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,13 +28,11 @@ class TransFormNodeTest {
 
     @Test
     @DisplayName("process()를 호출하면 메시지가 등록된 함수로 변환되어 OutputPort로 전달된다.")
-    void process_WhenCalled_TransformsMessageAndSendsToOutputPort() {
+    void process_WhenCalled_TransformsMessageAndSendsToOutputPort() throws InterruptedException{
         // given
         TransformNode transformNode = TransformNode.create("test", TransformFixture.FUNCTION);
         OutputPort outputPort = transformNode.getOutputPort("out");
-        Connection connection = Connection.create("test");
-
-        outputPort.connect(connection);
+        InputPort nextInputPort = FbpTestUtils.getConnectedInputPort(outputPort);
 
         double fahrenheit = 102.5;
         Message message = Message.create()
@@ -42,7 +41,7 @@ class TransFormNodeTest {
         // when
         transformNode.process(message);
 
-        Message found = connection.poll();
+        Message found = nextInputPort.poll();
 
         // then
         assertThat(found)
@@ -58,9 +57,7 @@ class TransFormNodeTest {
         // given
         TransformNode transformNode = TransformNode.create("test", null);
         OutputPort outputPort = transformNode.getOutputPort("out");
-        Connection connection = Connection.create("test");
-
-        outputPort.connect(connection);
+        InputPort nextInputPort = FbpTestUtils.getConnectedInputPort(outputPort);
 
         Message message = Message.create();
 
@@ -68,7 +65,7 @@ class TransFormNodeTest {
         transformNode.onProcess(message);
 
         // then
-        assertThat(connection.getBufferSize())
+        assertThat(nextInputPort.getBufferSize())
                 .isZero();
     }
 }

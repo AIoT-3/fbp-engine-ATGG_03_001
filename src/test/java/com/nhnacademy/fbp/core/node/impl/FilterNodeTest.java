@@ -1,10 +1,10 @@
 package com.nhnacademy.fbp.core.node.impl;
 
-import com.nhnacademy.fbp.core.connection.Connection;
 import com.nhnacademy.fbp.core.messsage.Message;
 import com.nhnacademy.fbp.core.node.AbstractNode;
 import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
+import com.nhnacademy.fbp.core.utils.FbpTestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -35,15 +35,13 @@ class FilterNodeTest {
 
     @Test
     @DisplayName("process()가 호출되면 threshold보다 작은 메시지는 필터링되고, 그렇지 않은 메시지는 통과한다.")
-    void process_WhenCalled_FiltersMessages() {
+    void process_WhenCalled_FiltersMessages() throws InterruptedException {
         // given
         AbstractNode filterNode = FilterNode.create("test", "threshold", 10.0);
 
-        Connection connection = Connection.create("test");
-
         OutputPort outputPort = filterNode.getOutputPort("out");
 
-        outputPort.connect(connection);
+        InputPort inputPort = FbpTestUtils.getConnectedInputPort(outputPort);
 
         Message message1 = Message.create()
                 .withEntry("threshold", 5.0);
@@ -55,13 +53,13 @@ class FilterNodeTest {
         filterNode.process(message1);
         filterNode.process(message2);
 
-        int receiveCount = connection.getBufferSize();
+        int receiveCount = inputPort.getBufferSize();
 
         // then
         assertThat(receiveCount)
                 .isEqualTo(1);
 
-        Message found = connection.poll();
+        Message found = inputPort.poll();
 
         assertThat(found)
                 .isNotNull()

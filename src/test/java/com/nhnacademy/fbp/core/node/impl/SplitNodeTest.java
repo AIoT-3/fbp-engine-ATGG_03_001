@@ -1,8 +1,9 @@
 package com.nhnacademy.fbp.core.node.impl;
 
-import com.nhnacademy.fbp.core.connection.Connection;
 import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
+import com.nhnacademy.fbp.core.utils.FbpTestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -12,18 +13,14 @@ class SplitNodeTest {
 
     @Test
     @DisplayName("process()가 호출되면 threshold 이상인 메시지는 'match' 포트로, 그렇지 않은 메시지는 'mismatch' 포트로 전달된다.")
-    void process_WhenCalled_SplitsMessages() {
+    void process_WhenCalled_SplitsMessages() throws InterruptedException {
         // given
         String key = "temperature";
         SplitNode splitNode = SplitNode.create("test", key, 30);
         OutputPort matchOutputPort = splitNode.getOutputPort("match");
         OutputPort mismatchOutputPort = splitNode.getOutputPort("mismatch");
-
-        Connection matchConn = Connection.create("test");
-        Connection mismatchConn = Connection.create("test");
-
-        matchOutputPort.connect(matchConn);
-        mismatchOutputPort.connect(mismatchConn);
+        InputPort matchNextInputPort = FbpTestUtils.getConnectedInputPort(matchOutputPort);
+        InputPort mismatchNextInputPort = FbpTestUtils.getConnectedInputPort(mismatchOutputPort);
 
         double lowTemperature = 10;
         double highTemperature = 40;
@@ -37,13 +34,13 @@ class SplitNodeTest {
         splitNode.process(message2);
 
         // then
-        assertThat(matchConn.getBufferSize())
+        assertThat(matchNextInputPort.getBufferSize())
                 .isEqualTo(1);
-        assertThat(mismatchConn.getBufferSize())
+        assertThat(mismatchNextInputPort.getBufferSize())
                 .isEqualTo(1);
 
-        Message matchFound = matchConn.poll();
-        Message mismatchFound = mismatchConn.poll();
+        Message matchFound = matchNextInputPort.poll();
+        Message mismatchFound = mismatchNextInputPort.poll();
 
         assertThat(matchFound)
                 .isNotNull()
@@ -60,15 +57,13 @@ class SplitNodeTest {
 
     @Test
     @DisplayName("threshold와 동일한 메시지는 'match' 포트로 전달된다.")
-    void process_WhenValueEqualsThreshold_SendsToMatchPort() {
+    void process_WhenValueEqualsThreshold_SendsToMatchPort() throws InterruptedException {
         // given
         String key = "temperature";
         double threshold = 30;
         SplitNode splitNode = SplitNode.create("test", key, threshold);
         OutputPort matchOutputPort = splitNode.getOutputPort("match");
-        Connection matchConn = Connection.create("test");
-
-        matchOutputPort.connect(matchConn);
+        InputPort matchNextInputPort = FbpTestUtils.getConnectedInputPort(matchOutputPort);
 
         Message message = Message.create()
                 .withEntry(key, threshold);
@@ -77,10 +72,10 @@ class SplitNodeTest {
         splitNode.process(message);
 
         // then
-        assertThat(matchConn.getBufferSize())
+        assertThat(matchNextInputPort.getBufferSize())
                 .isEqualTo(1);
 
-        Message found = matchConn.poll();
+        Message found = matchNextInputPort.poll();
 
         assertThat(found)
                 .isNotNull()

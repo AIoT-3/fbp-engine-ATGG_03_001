@@ -21,6 +21,7 @@ class DelayNodeTest {
 
         // then
         long elapsedTime = endTime - startTime;
+
         assertThat(elapsedTime)
                 .isGreaterThanOrEqualTo(2000)
                 .isLessThan(2500);

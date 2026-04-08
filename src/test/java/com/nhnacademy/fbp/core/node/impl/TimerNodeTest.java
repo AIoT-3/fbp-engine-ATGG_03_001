@@ -3,7 +3,9 @@ package com.nhnacademy.fbp.core.node.impl;
 import com.nhnacademy.fbp.core.connection.Connection;
 import com.nhnacademy.fbp.core.messsage.Message;
 import com.nhnacademy.fbp.core.node.AbstractNode;
+import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
+import com.nhnacademy.fbp.core.utils.FbpTestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,18 +16,16 @@ class TimerNodeTest {
 
     @Test
     @DisplayName("initialize()가 호출되면 OutputPort로 메시지가 전송된다.")
-    void initialize_WhenCalled_SendsMessageToOutputPort() {
+    void initialize_WhenCalled_SendsMessageToOutputPort() throws InterruptedException {
         // given
         AbstractNode timerNode = TimerNode.create("test", 1000);
-        Connection connection = Connection.create("test");
         OutputPort outputPort = timerNode.getOutputPort("out");
-
-        outputPort.connect(connection);
+        InputPort nextInputPort = FbpTestUtils.getConnectedInputPort(outputPort);
 
         // when
         timerNode.initialize();
 
-        Message found = connection.poll();
+        Message found = nextInputPort.poll();
 
         // then
         assertThat(found)
@@ -37,20 +37,16 @@ class TimerNodeTest {
     void initialize_WhenSendMessage_IncreaseTick() throws InterruptedException {
         // given
         AbstractNode timerNode = TimerNode.create("test", 1000);
-
-        Connection connection = Connection.create("test");
-
         OutputPort outputPort = timerNode.getOutputPort("out");
-
-        outputPort.connect(connection);
+        InputPort nextInputPort = FbpTestUtils.getConnectedInputPort(outputPort);
 
         // when
 
         timerNode.initialize();
 
-        Message found1 = connection.poll();
+        Message found1 = nextInputPort.poll();
         Thread.sleep(1000);
-        Message found2 = connection.poll();
+        Message found2 = nextInputPort.poll();
 
         // then
         assertSoftly(softly -> {
@@ -70,12 +66,8 @@ class TimerNodeTest {
     void shutdown_WhenCalled_StopsGeneratingMessages() throws InterruptedException {
         // given
         TimerNode timerNode = TimerNode.create("test", 1000);
-
-        Connection connection = Connection.create("test");
-
         OutputPort outputPort = timerNode.getOutputPort("out");
-
-        outputPort.connect(connection);
+        InputPort nextInputPort = FbpTestUtils.getConnectedInputPort(outputPort);
 
         // when
         timerNode.initialize();
@@ -91,7 +83,7 @@ class TimerNodeTest {
         Thread.sleep(3000);
 
         // then
-        assertThat(connection.getBufferSize())
+        assertThat(nextInputPort.getBufferSize())
                 .isEqualTo(2);
     }
 
@@ -100,12 +92,8 @@ class TimerNodeTest {
     void create_when500msInterval_Generates4MessageIn2Seconds() throws InterruptedException {
         // given
         TimerNode timerNode = TimerNode.create("test", 500);
-
-        Connection connection = Connection.create("test");
-
         OutputPort outputPort = timerNode.getOutputPort("out");
-
-        outputPort.connect(connection);
+        InputPort nextInputPort = FbpTestUtils.getConnectedInputPort(outputPort);
 
         // when
         timerNode.initialize();
@@ -113,7 +101,7 @@ class TimerNodeTest {
         Thread.sleep(2000);
 
         // then
-        assertThat(connection.getBufferSize())
+        assertThat(nextInputPort.getBufferSize())
                 .isGreaterThan(3);
     }
 }
