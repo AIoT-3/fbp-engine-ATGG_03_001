@@ -11,11 +11,15 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class FileWriterNodeTest {
 
+    static class FileWriterNodeFixture {
+        static final String FILE_PATH = "log/test_output.txt";
+    }
+
     @Test
     @DisplayName("초기화 메서드를 호출하면, 지정된 경로에 파일이 생성된다.")
     void initialize_WhenCalled_CreatesFile() {
         // given
-        String filePath = "test_output.txt";
+        String filePath = FileWriterNodeFixture.FILE_PATH;
         FileWriterNode node = FileWriterNode.create("test", filePath);
 
         // when & then
@@ -31,7 +35,7 @@ class FileWriterNodeTest {
     @DisplayName("메시지를 처리하면, 파일에 메시지가 기록된다.")
     void process_WhenCalled_WritesToFile() {
         // given
-        String filePath = "test_output.txt";
+        String filePath = FileWriterNodeFixture.FILE_PATH;
         FileWriterNode node = FileWriterNode.create("test", filePath);
         node.initialize();
 
@@ -54,7 +58,7 @@ class FileWriterNodeTest {
     @DisplayName("종료 메서드가 호출되면, 메시지가 파일에 더 이상 기록되지 않는다.")
     void shutdown_WhenCalled_StopsWritingToFile() {
         // given
-        String filePath = "test_output.txt";
+        String filePath = FileWriterNodeFixture.FILE_PATH;
         FileWriterNode node = FileWriterNode.create("test", filePath);
         node.initialize();
 
