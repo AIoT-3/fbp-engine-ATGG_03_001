@@ -3,7 +3,7 @@ package com.nhnacademy.fbp.core.flow;
 import com.nhnacademy.fbp.core.connection.Connection;
 import com.nhnacademy.fbp.core.node.AbstractNode;
 import com.nhnacademy.fbp.core.node.exception.NodeNotFoundException;
-import com.nhnacademy.fbp.core.node.impl.LogNode;
+import com.nhnacademy.fbp.node.standard.LogNode;
 import com.nhnacademy.fbp.core.port.exception.InputPortNotFoundException;
 import com.nhnacademy.fbp.core.port.exception.OutputPortNotFoundException;
 import org.junit.jupiter.api.DisplayName;

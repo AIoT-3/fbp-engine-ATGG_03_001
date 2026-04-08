@@ -1,8 +1,8 @@
 package com.nhnacademy.fbp.core.node;
 
 import com.nhnacademy.fbp.core.messsage.Message;
-import com.nhnacademy.fbp.core.port.impl.DefaultInputPort;
-import com.nhnacademy.fbp.core.port.impl.DefaultOutputPort;
+import com.nhnacademy.fbp.core.port.DefaultInputPort;
+import com.nhnacademy.fbp.core.port.DefaultOutputPort;
 import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
 import lombok.Getter;

@@ -2,7 +2,7 @@ package com.nhnacademy.fbp;
 
 import com.nhnacademy.fbp.core.engine.FlowEngine;
 import com.nhnacademy.fbp.core.flow.Flow;
-import com.nhnacademy.fbp.core.node.impl.*;
+import com.nhnacademy.fbp.node.standard.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;

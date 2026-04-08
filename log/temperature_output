@@ -1,0 +1,14 @@
+[e3d07e74-79c6-4690-88e4-ff0eca5aa0ab] { temperature=22.5, unit=°C, sensorId=temperature, timestamp=1775623780839 }
+[8643ac2c-baf2-4c95-9bf7-64a3d6436675] { temperature=29.2, unit=°C, sensorId=temperature, timestamp=1775623783834 }
+[b048efaf-a695-4fde-b079-016a20ba1112] { temperature=27.3, unit=°C, sensorId=temperature, timestamp=1775623785836 }
+[0211e59d-16ad-46a6-ad44-a4432751d110] { temperature=23.3, unit=°C, sensorId=temperature, timestamp=1775623791839 }
+[49a80bc0-4bf4-4f0a-ab04-bd7a5da74c71] { temperature=15.9, unit=°C, sensorId=temperature, timestamp=1775623793837 }
+[8c6f9811-c93f-4b74-a8fd-cd75d3007348] { temperature=26.6, unit=°C, sensorId=temperature, timestamp=1775623794834 }
+[140f922a-9957-46b0-a12f-1eb61326706e] { temperature=21.4, unit=°C, sensorId=temperature, timestamp=1775623795839 }
+[5979001b-7e44-410a-86f4-35c7d05b7fad] { temperature=21.5, unit=°C, sensorId=temperature, timestamp=1775623797836 }
+[47fc75b3-95e7-4f92-8ec5-2271df0b58ff] { temperature=15.6, unit=°C, sensorId=temperature, timestamp=1775623798838 }
+[cdee2405-45e6-4347-bab2-c2f8406f98f9] { temperature=20.1, unit=°C, sensorId=temperature, timestamp=1775623799835 }
+[9bf8b4b6-61dc-4a08-b8e6-67287bd80b2e] { temperature=24.6, unit=°C, sensorId=temperature, timestamp=1775623800839 }
+[481f036a-6c9d-4a11-9729-48c85e082e67] { temperature=25.8, unit=°C, sensorId=temperature, timestamp=1775623801834 }
+[65a0e589-91d6-4851-be65-add3105704fd] { temperature=25.3, unit=°C, sensorId=temperature, timestamp=1775623802839 }
+[0619c0cf-2d0a-4171-9c23-6b1d904390d0] { temperature=29.9, unit=°C, sensorId=temperature, timestamp=1775623805834 }

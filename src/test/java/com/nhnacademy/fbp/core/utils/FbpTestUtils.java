@@ -1,7 +1,7 @@
 package com.nhnacademy.fbp.core.utils;
 
 import com.nhnacademy.fbp.core.connection.Connection;
-import com.nhnacademy.fbp.core.port.impl.DefaultInputPort;
+import com.nhnacademy.fbp.core.port.DefaultInputPort;
 import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
 
