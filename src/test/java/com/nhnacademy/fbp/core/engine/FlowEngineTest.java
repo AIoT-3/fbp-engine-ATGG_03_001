@@ -153,7 +153,7 @@ class FlowEngineTest {
 
     @Test
     @DisplayName("listFlows()를 호출하면 등록된 모든 플로우의 ID와 상태가 조회된다.")
-    void listFlow_WhenCalled_PrintAllFlowIdAndState() {
+    void listFlow_WhenCalled_ReturnsFlowStatusList() {
         // given
         String flowId1 = "test1";
         String flowId2 = "test2";
@@ -169,6 +169,8 @@ class FlowEngineTest {
         engine.register(flow2);
 
         // when & then
-        assertDoesNotThrow(engine::listFlows);
+        assertThat(engine.listFlows())
+                .isNotNull()
+                .isNotEmpty();
     }
 }
