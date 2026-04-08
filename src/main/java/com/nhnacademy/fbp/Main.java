@@ -5,12 +5,10 @@ import com.nhnacademy.fbp.core.flow.Flow;
 import com.nhnacademy.fbp.node.mqtt.MqttSubscriberNode;
 import com.nhnacademy.fbp.node.standard.*;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.paho.mqttv5.common.MqttException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.UUID;
 
 @Slf4j
 public class Main {
@@ -66,17 +64,14 @@ public class Main {
     }
 
     private static void initFlow3() {
-        try {
-            Flow flow = Flow.create("mqtt-test")
-                    .addNode(MqttSubscriberNode.create("mqtt", "tcp://localhost:1883", "sensor"))
-                    .addNode(LogNode.create("log"));
+        String id = "mqtt-test";
+        Flow flow = Flow.create("mqtt-test")
+                .addNode(MqttSubscriberNode.create(id, "localhost", 1883, "#"))
+                .addNode(LogNode.create("log"));
 
-            flow.connect("mqtt", "log");
+        flow.connect(id, "log");
 
-            engine.register(flow);
-        } catch (MqttException e) {
-            throw new RuntimeException(e);
-        }
+        engine.register(flow);
     }
 
     private static void execute(String input) {

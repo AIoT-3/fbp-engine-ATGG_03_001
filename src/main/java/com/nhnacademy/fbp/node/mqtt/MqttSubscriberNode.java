@@ -1,52 +1,53 @@
 package com.nhnacademy.fbp.node.mqtt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.hivemq.client.mqtt.MqttClient;
+import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
+import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import com.nhnacademy.fbp.common.util.JsonParserUtils;
 import com.nhnacademy.fbp.core.messsage.Message;
 import com.nhnacademy.fbp.core.node.ProtocolNode;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.paho.mqttv5.client.IMqttToken;
-import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
-import org.eclipse.paho.mqttv5.client.MqttClient;
-import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
-import org.eclipse.paho.mqttv5.common.MqttException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Slf4j
 public class MqttSubscriberNode extends ProtocolNode {
-    private final MqttClient client;
+    private final Mqtt5BlockingClient client;
     private final String topic;
-    private final MqttConnectionOptions options;
+    private final String brokerHost;
+    private final int brokerPort;
 
-    private MqttSubscriberNode(String id, String brokerUrl, String topic, long reconnectIntervalMs) throws MqttException {
+    private MqttSubscriberNode(String id, String brokerHost, int brokerPort, String topic, long reconnectIntervalMs) {
         super(id, reconnectIntervalMs);
         this.topic = topic;
-        client = new MqttClient(brokerUrl, id);
+        this.brokerHost = brokerHost;
+        this.brokerPort = brokerPort;
 
-        options = new MqttConnectionOptions();
-        options.setConnectionTimeout(5);
-        options.setCleanStart(true);
-        options.setAutomaticReconnect(true);
+        client = MqttClient.builder()
+                .useMqttVersion5()
+                .identifier(id)
+                .serverHost(brokerHost)
+                .serverPort(brokerPort)
+                .buildBlocking();
 
         addOutputPort("out");
     }
 
-    public static MqttSubscriberNode create(String id, String brokerUrl, String topic) throws MqttException {
-        return new MqttSubscriberNode(id, brokerUrl, topic, 5000);
+    public static MqttSubscriberNode create(String id, String brokerHost, int brokerPort, String topic) {
+        return new MqttSubscriberNode(id, brokerHost, brokerPort, topic, 5000);
     }
 
     @Override
     public void connect() {
         try {
-            client.connect(options);
-
-            log.info("연결 여부: {}", client.isConnected());
-        } catch (MqttException e) {
-
-            log.info("{}", client.getDebug());
-            log.info("MQTT 연결 중 오류 발생: {}", e.getMessage(), e);
-            reconnect();
+            client.connect();
+        } catch (Exception e) {
+            log.error("MQTT 연결 실패: {}", e.getMessage(), e);
         }
     }
 
@@ -58,9 +59,9 @@ public class MqttSubscriberNode extends ProtocolNode {
     @Override
     public void disconnect() {
         try {
-            client.close();
-        } catch (MqttException e) {
-            log.error("MQTT 연결 종료 중 오류 발생: {}", e.getMessage());
+            client.disconnect();
+        } catch (Exception e) {
+            log.error("MQTT 연결 해제 실패: {}", e.getMessage(), e);
         }
     }
 
@@ -71,51 +72,34 @@ public class MqttSubscriberNode extends ProtocolNode {
 
     @Override
     public void run() {
-        try {
-            log.info("클라이언트 상태: {}", client != null);
-            client.subscribe(topic, 1, (t, message) -> {
-                try {
-                    log.info("MQTT 콜백 실행: {}", topic);
+        try (Mqtt5BlockingClient.Mqtt5Publishes publishes = client.publishes(MqttGlobalPublishFilter.ALL)) {
+            client.subscribeWith().topicFilter(topic).send();
 
-                    String payloadStr = new String(message.getPayload());
-
-                    log.info("MQTT 메시지 도착: {}", payloadStr);
-
-                    Map<String, Object> payload = JsonParserUtils.get().readValue(payloadStr, new TypeReference<>() {
-                    });
-
-                    Message converted = Message.create(payload)
-                            .withEntry("topic", t);
-
-                    process(converted);
-                } catch (Exception e) {
-                    log.error("에러 발생: {}", e.getMessage(), e);
-                }
-            });
-
-//            IMqttToken token = client.subscribe(topic, 1, (t, msg) -> {
-//                log.info("실행");
-//            });
-
-//            token.waitForCompletion(5000);
-
-            System.out.println("test");
-
+            log.info("MQTT 구독 시작 - 브로커: {}:{}, 토픽: {}", brokerHost, brokerPort, topic);
 
             while (!Thread.currentThread().isInterrupted()) {
-                Thread.sleep(10000);
-            }
+                log.info("MQTT 클라이언트 - 연결 상태: {}", client.getState());
+                Mqtt5Publish publish = publishes.receive();
 
-        } catch (MqttException e) {
-            log.error("MQTT 실행 오류 발생: {}", e.getMessage());
-            reconnect();
+                String payloadStr = new String(publish.getPayloadAsBytes(), StandardCharsets.UTF_8);
+
+                log.info("MQTT 메시지 수신 - 토픽: {}, 페이로드: {}", publish.getTopic(), payloadStr);
+
+                Map<String, Object> payload = JsonParserUtils.get().readValue(payloadStr, new TypeReference<>() {});
+
+                Message converted = Message.create(payload)
+                        .withEntry("topic", publish.getTopic().toString());
+
+                process(converted);
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        } catch (Exception e) {
-            log.info("{}", e.getMessage(), e);
-        } finally {
-            System.out.println("test");
+        } catch (JsonMappingException e) {
+            log.error("MQTT 메시지 JSON 매핑 오류: {}", e.getMessage(), e);
+        } catch (JsonProcessingException e) {
+            log.error("MQTT 메시지 JSON 처리 오류: {}", e.getMessage(), e);
+        } catch (Throwable e) {
+            log.error("알 수 없는 MQTT 오류: {}", e.getMessage(), e);
         }
-
     }
 }

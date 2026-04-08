@@ -22,7 +22,7 @@ public class Flow {
     private final String id;
     private final Map<String, AbstractNode> nodes;
     private final List<Connection> connections;
-    private final ExecutorService executorService;
+    private ExecutorService executorService;
     private FlowState state;
 
     private Flow(String id) {
@@ -31,7 +31,7 @@ public class Flow {
 
         nodes = new HashMap<>();
         connections = new ArrayList<>();
-        executorService = Executors.newFixedThreadPool(10);
+        executorService = Executors.newVirtualThreadPerTaskExecutor();
     }
 
     public static Flow create(String id) {
@@ -77,6 +77,10 @@ public class Flow {
 
     public void initialize() {
         nodes.values().forEach(AbstractNode::initialize);
+
+        if (executorService.isShutdown()) {
+            executorService = Executors.newVirtualThreadPerTaskExecutor();
+        }
 
         nodes.values().forEach(executorService::submit);
 
