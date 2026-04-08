@@ -1,7 +1,7 @@
 package com.nhnacademy.fbp.core.connection;
 
 import com.nhnacademy.fbp.core.messsage.Message;
-import com.nhnacademy.fbp.core.port.DefaultInputPort;
+import com.nhnacademy.fbp.core.port.impl.DefaultInputPort;
 import com.nhnacademy.fbp.core.port.InputPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

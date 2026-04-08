@@ -1,7 +1,8 @@
-package com.nhnacademy.fbp.core.port;
+package com.nhnacademy.fbp.core.port.impl;
 
 import com.nhnacademy.fbp.core.connection.Connection;
 import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.port.OutputPort;
 import lombok.Getter;
 
 import java.util.ArrayList;

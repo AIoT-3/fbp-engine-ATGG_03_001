@@ -1,4 +1,4 @@
-package com.nhnacademy.fbp.core.port;
+package com.nhnacademy.fbp.core.port.impl;
 
 import com.nhnacademy.fbp.core.messsage.Message;
 import org.junit.jupiter.api.DisplayName;
