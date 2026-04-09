@@ -7,13 +7,17 @@ public class HumiditySensorNode extends AbstractNode {
     private final double min;
     private final double max;
 
-    protected HumiditySensorNode(String id, double min, double max) {
+    private HumiditySensorNode(String id, double min, double max) {
         super(id);
         this.min = min;
         this.max = max;
 
         addInputPort("trigger");
         addOutputPort("out");
+    }
+
+    public static HumiditySensorNode create(String id, double min, double max) {
+        return new HumiditySensorNode(id, min, max);
     }
 
     @Override
