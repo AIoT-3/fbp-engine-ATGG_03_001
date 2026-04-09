@@ -29,6 +29,22 @@ public class Message {
         );
     }
 
+    public static Message from(Map<String, Object> jsonMap) {
+        if (!jsonMap.containsKey("id") || !jsonMap.containsKey("timestamp") || !jsonMap.containsKey("payload")) {
+            return create(jsonMap);
+        }
+
+        UUID id = UUID.fromString(String.valueOf(jsonMap.get("id")));
+        Number timestamp = (Number) jsonMap.get("timestamp");
+        Map<String, Object> payload = (Map<String, Object>) jsonMap.get("payload");
+
+        return new Message(
+                id,
+                Map.copyOf(payload),
+                timestamp.longValue()
+        );
+    }
+
     public Message withEntry(String key, Object value) {
         Map<String, Object> newPayload = new HashMap<>(payload);
 
