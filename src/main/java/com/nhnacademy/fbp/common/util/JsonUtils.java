@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class JsonParserUtils {
+public final class JsonUtils {
     private static class Holder {
         private static final ObjectMapper INSTANCE = new ObjectMapper();
     }
