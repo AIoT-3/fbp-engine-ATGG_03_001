@@ -2,6 +2,7 @@ package com.nhnacademy.fbp;
 
 import com.nhnacademy.fbp.core.engine.FlowEngine;
 import com.nhnacademy.fbp.core.flow.Flow;
+import com.nhnacademy.fbp.node.mqtt.MqttPublisherNode;
 import com.nhnacademy.fbp.node.mqtt.MqttSubscriberNode;
 import com.nhnacademy.fbp.node.standard.*;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ public class Main {
         initFlow1();
         initFlow2();
         initFlow3();
+        initFlow4();
 
         while (true) {
             System.out.print("fbp> ");
@@ -64,12 +66,25 @@ public class Main {
     }
 
     private static void initFlow3() {
-        String id = "mqtt-test";
-        Flow flow = Flow.create("mqtt-test")
+        String id = "mqtt-in";
+        Flow flow = Flow.create("mqtt-subscribe-test")
                 .addNode(MqttSubscriberNode.create(id, "localhost", 1883, "#"))
                 .addNode(LogNode.create("log"));
 
         flow.connect(id, "log");
+
+        engine.register(flow);
+    }
+
+    private static void initFlow4() {
+        String id = "mqtt-out";
+        Flow flow = Flow.create("mqtt-publish-test")
+                .addNode(TimerNode.create("timer", 1000))
+                .addNode(HumiditySensorNode.create("humidity", 40, 80))
+                .addNode(MqttPublisherNode.create(id, "localhost", 1883, "test"));
+
+        flow.connect("timer", "out", "humidity", "trigger");
+        flow.connect("humidity", id);
 
         engine.register(flow);
     }
