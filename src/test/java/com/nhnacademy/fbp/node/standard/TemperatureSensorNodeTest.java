@@ -39,7 +39,7 @@ class TemperatureSensorNodeTest {
     }
 
     @Test
-    @DisplayName("메시지를 생성하면, 생성된 메시지에 sensor, temperature, unit, timestamp 키가 모두 존재한다.")
+    @DisplayName("메시지를 생성하면, 생성된 메시지에 sensorId, temperature, unit, timestamp 키가 모두 존재한다.")
     void process_WhenCalled_ContainsRequiredKeys() throws InterruptedException {
         // given
         TemperatureSensorNode node = TemperatureSensorNode.create("test", 0, 100);
