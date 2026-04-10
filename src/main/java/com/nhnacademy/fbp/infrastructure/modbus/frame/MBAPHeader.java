@@ -10,14 +10,21 @@ public record MBAPHeader(
         int length,
         int unitId
 ) {
-    public static MBAPHeader createRequest(int transactionId, ModbusPdu pdu, int unitId) {
-        int length = pdu.getLength() + 1;
+
+    public static MBAPHeader createRequest(int transactionId, int length, int unitId) {
         return new MBAPHeader(transactionId, 0, length, unitId);
     }
 
+    public static MBAPHeader createRequest(int transactionId, ModbusPdu pdu, int unitId) {
+        return createRequest(transactionId, pdu.getLength() + 1, unitId);
+    }
+
+    public static MBAPHeader createResponse(MBAPHeader requestHeader, int length) {
+        return new MBAPHeader(requestHeader.transactionId, requestHeader.protocolId, length, requestHeader.unitId);
+    }
+
     public static MBAPHeader createResponse(MBAPHeader requestHeader, ModbusPdu pdu) {
-        int length = pdu.getLength() + 1;
-        return new MBAPHeader(requestHeader.transactionId(), requestHeader.protocolId, length, requestHeader.unitId);
+        return createResponse(requestHeader, pdu.getLength() + 1);
     }
 
     public byte[] encode() {
