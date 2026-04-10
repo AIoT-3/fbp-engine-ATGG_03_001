@@ -4,6 +4,7 @@ import com.nhnacademy.fbp.infrastructure.modbus.frame.*;
 import com.nhnacademy.fbp.infrastructure.modbus.frame.pdu.ReadHoldingRequestPdu;
 import com.nhnacademy.fbp.infrastructure.modbus.frame.pdu.ReadHoldingResponsePdu;
 import com.nhnacademy.fbp.infrastructure.modbus.frame.pdu.WriteSingleRequestPdu;
+import com.nhnacademy.fbp.infrastructure.modbus.frame.pdu.WriteSingleResponsePdu;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -35,6 +36,7 @@ public class ModbusTcpClient {
             in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
         } catch (IOException e) {
+            // TODO: 적절한 처리
             throw new RuntimeException(e);
         }
     }
@@ -46,29 +48,23 @@ public class ModbusTcpClient {
                 out.close();
                 socket.close();
             } catch (IOException e) {
+                // TODO: 적절한 처리
                 throw new RuntimeException(e);
             }
         }
     }
 
     public int[] readHoldingRegisters(int unitId, int startAddress, int quantity) {
-        int length = quantity * 2 + 3;
-
-        MBAPHeader requestHeader = MBAPHeader.createRequest(transactionId++, length, unitId);
-        ReadHoldingRequestPdu pdu = new ReadHoldingRequestPdu(startAddress, quantity);
+        ReadHoldingRequestPdu requestPdu = new ReadHoldingRequestPdu(startAddress, quantity);
+        MBAPHeader requestHeader = MBAPHeader.createRequest(transactionId++, requestPdu, unitId);
 
         try {
             out.write(requestHeader.encode());
-            out.write(pdu.encode());
+            out.write(requestPdu.encode());
             out.flush();
 
             MBAPHeader responseHeader = MBAPHeader.read(in);
-
-            int responseFunctionCode = in.readUnsignedByte();
-
-            int pduLength = responseHeader.length() - 1;
-
-            ReadHoldingResponsePdu responsePdu = (ReadHoldingResponsePdu) ModbusPdu.readResponse(in, responseFunctionCode, pduLength);
+            ReadHoldingResponsePdu responsePdu = (ReadHoldingResponsePdu) ModbusPdu.readResponse(in, responseHeader);
 
             int[] result = new int[quantity];
 
@@ -81,17 +77,15 @@ public class ModbusTcpClient {
             return result;
 
         } catch (IOException e) {
-            // TODO: 처리
+            // TODO: 적절한 처리
             throw new RuntimeException(e);
         }
 
     }
 
-
-
     public void writeSingleRegister(int unitId, int address, int value) {
-        MBAPHeader requestHeader = MBAPHeader.createRequest(transactionId++, 1, unitId);
         WriteSingleRequestPdu requestPdu = new WriteSingleRequestPdu(address, value);
+        MBAPHeader requestHeader = MBAPHeader.createRequest(transactionId++, requestPdu, unitId);
 
         try {
             out.write(requestHeader.encode());
@@ -99,12 +93,9 @@ public class ModbusTcpClient {
             out.flush();
 
             MBAPHeader responseHeader = MBAPHeader.read(in);
-
-            int functionCode = in.readUnsignedByte();
-
-            // TODO: 예외 처리
-
+            WriteSingleResponsePdu responsePdu = (WriteSingleResponsePdu) ModbusPdu.readResponse(in, responseHeader);
         } catch (IOException e) {
+            // TODO: 적절한 처리
             throw new RuntimeException(e);
         }
 

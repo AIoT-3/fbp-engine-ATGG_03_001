@@ -18,9 +18,7 @@ public record ReadHoldingResponsePdu(
 
     @Override
     public byte[] encode() {
-        int totalSize = 1 + 1 + data.length;
-
-        ByteBuffer buffer = ByteBuffer.allocate(totalSize);
+        ByteBuffer buffer = ByteBuffer.allocate(getLength());
 
         return buffer.put((byte) getFunctionCode())
                 .put((byte) byteCount)
@@ -28,10 +26,16 @@ public record ReadHoldingResponsePdu(
                 .array();
     }
 
+    @Override
+    public int getLength() {
+        return 1 + 1 + data.length;
+    }
+
     public static ReadHoldingResponsePdu read(DataInputStream in, int remainingLength) throws IOException {
         int byteCount = in.readUnsignedByte();
 
         if (remainingLength != byteCount + 1) {
+
             throw new IOException("패킷 길이 불일치");
         }
 

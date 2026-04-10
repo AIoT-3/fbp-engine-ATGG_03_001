@@ -18,11 +18,16 @@ public record ReadHoldingRequestPdu(
 
     @Override
     public byte[] encode() {
-        return ByteBuffer.allocate(5)
+        return ByteBuffer.allocate(getLength())
                 .put((byte) getFunctionCode())
                 .putShort((short) startAddress)
                 .putShort((short) quantity)
                 .array();
+    }
+
+    @Override
+    public int getLength() {
+        return 5;
     }
 
     public static ReadHoldingRequestPdu read(DataInputStream in) throws IOException {

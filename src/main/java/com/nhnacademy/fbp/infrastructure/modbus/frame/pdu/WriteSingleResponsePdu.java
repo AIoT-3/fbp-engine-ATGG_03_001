@@ -18,11 +18,16 @@ public record WriteSingleResponsePdu(
 
     @Override
     public byte[] encode() {
-        return ByteBuffer.allocate(5)
+        return ByteBuffer.allocate(getLength())
                 .put((byte) getFunctionCode())
                 .putShort((short) address)
                 .putShort((short) value)
                 .array();
+    }
+
+    @Override
+    public int getLength() {
+        return 5;
     }
 
     public static WriteSingleResponsePdu read(DataInputStream in) throws IOException {

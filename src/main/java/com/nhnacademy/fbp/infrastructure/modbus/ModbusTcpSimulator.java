@@ -25,6 +25,7 @@ public class ModbusTcpSimulator {
             serverSocket = new ServerSocket(port);
             registers = new int[registerCount];
         } catch (IOException e) {
+            // TODO: 적절한 처리
             throw new RuntimeException(e);
         }
     }
@@ -43,6 +44,7 @@ public class ModbusTcpSimulator {
 
                     handleClient(client);
                 } catch (IOException e) {
+                    // TODO: 적절한 처리
                     throw new RuntimeException(e);
                 }
             }
@@ -55,6 +57,7 @@ public class ModbusTcpSimulator {
 
             running = false;
         } catch (IOException e) {
+            // TODO: 적절한 처리
             throw new RuntimeException(e);
         }
     }
@@ -63,17 +66,28 @@ public class ModbusTcpSimulator {
         return registers[address];
     }
 
+    public byte[] getRegisters(int startAddress, int quantity) {
+        ByteBuffer buffer = ByteBuffer.allocate(quantity * 2);
+
+        for (int i = startAddress; i < startAddress + quantity; i++) {
+            buffer.putShort((short) registers[i]);
+        }
+
+        return buffer.array();
+    }
+
+    public void setRegister(int address, int value) {
+        registers[address] = value;
+    }
+
     private void handleClient(Socket client) {
         Thread.ofVirtual().start(() -> {
                 try (DataInputStream in = new DataInputStream(new BufferedInputStream(client.getInputStream()));
                      DataOutputStream out = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()))) {
                     while (!Thread.currentThread().isInterrupted()) {
-
                         MBAPHeader requestHeader = MBAPHeader.read(in);
 
-                        int functionCode = in.readUnsignedByte();
-
-                        ModbusPdu modbusPdu = ModbusPdu.readRequest(in, functionCode);
+                        ModbusPdu modbusPdu = ModbusPdu.readRequest(in);
 
                         switch (modbusPdu) {
                             case ReadHoldingRequestPdu requestPdu -> handleReadHoldingRequest(out, requestHeader, requestPdu);
@@ -82,6 +96,7 @@ public class ModbusTcpSimulator {
                         }
                     }
                 } catch (IOException e) {
+                    // TODO: 적절한 처리
                     throw new RuntimeException(e);
                 }
         });
@@ -91,18 +106,10 @@ public class ModbusTcpSimulator {
         int quantity = requestPdu.quantity();
         int startAddress = requestPdu.startAddress();
 
-        int byteCount = quantity * 2;
+        byte[] data = getRegisters(startAddress, quantity);
 
-        int responsePduLength = 2 + byteCount;
-
-        ByteBuffer buffer = ByteBuffer.allocate(quantity * 2);
-
-        for (int i = startAddress; i < startAddress + quantity; i++) {
-            buffer.putShort((short) registers[i]);
-        }
-
-        MBAPHeader responseHeader = MBAPHeader.createResponse(requestHeader, responsePduLength);
-        ReadHoldingResponsePdu responsePdu = new ReadHoldingResponsePdu(byteCount, buffer.array());
+        ReadHoldingResponsePdu responsePdu = new ReadHoldingResponsePdu(quantity * 2, data);
+        MBAPHeader responseHeader = MBAPHeader.createResponse(requestHeader, responsePdu);
 
         out.write(responseHeader.encode());
         out.write(responsePdu.encode());
@@ -113,7 +120,7 @@ public class ModbusTcpSimulator {
         int address = requestPdu.address();
         int value = requestPdu.value();
 
-        registers[address] = value;
+        setRegister(address, value);
 
         out.write(requestHeader.encode());
         out.write(requestPdu.encode());
@@ -121,6 +128,6 @@ public class ModbusTcpSimulator {
     }
 
     private void handleErrorRequest(DataOutputStream out) {
-
+        // TODO: 에러 로직
     }
 }
