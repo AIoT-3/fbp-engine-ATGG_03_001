@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ModbusReaderNode extends ProtocolNode {
+    private final String host;
+    private final int port;
     private final int slaveId;
     private final int startAddress;
     private final int count;
@@ -14,6 +16,8 @@ public class ModbusReaderNode extends ProtocolNode {
 
     private ModbusReaderNode(String id, String host, int port, int slaveId, int startAddress, int count) {
         super(id);
+        this.host = host;
+        this.port = port;
         this.slaveId = slaveId;
         this.startAddress = startAddress;
         this.count = count;

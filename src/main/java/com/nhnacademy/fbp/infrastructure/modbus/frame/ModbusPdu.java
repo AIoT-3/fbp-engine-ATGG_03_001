@@ -15,7 +15,7 @@ public interface ModbusPdu {
     int getLength();
 
     static ModbusPdu readRequest(DataInputStream in) throws IOException {
-        int functionCode = readFunctionCode(in);
+        int functionCode = in.readUnsignedByte();
 
         return switch (functionCode) {
             case 0x03 -> ReadHoldingRequestPdu.read(in);
@@ -24,14 +24,18 @@ public interface ModbusPdu {
         };
     }
 
-    static ModbusPdu readResponse(DataInputStream in, MBAPHeader responseHeader) throws IOException {
+    static ModbusPdu readResponse(DataInputStream in, int remainingLength) throws IOException {
         int functionCode = readFunctionCode(in);
 
         return switch (functionCode) {
-            case 0x03 -> ReadHoldingResponsePdu.read(in, responseHeader.length() - 2); // unitId, FC 이미 읽음
+            case 0x03 -> ReadHoldingResponsePdu.read(in, remainingLength);
             case 0x06 -> WriteSingleResponsePdu.read(in);
             default -> throw new ModbusException(functionCode, 0x01);
         };
+    }
+
+    static ModbusPdu readResponse(DataInputStream in, MBAPHeader responseHeader) throws IOException {
+        return readResponse(in, responseHeader.length() - 2); // unitId, FC 이미 읽음
     }
 
     private static int readFunctionCode(DataInputStream in) throws IOException {
