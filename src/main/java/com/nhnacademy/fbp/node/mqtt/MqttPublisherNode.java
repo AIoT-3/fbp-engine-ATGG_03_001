@@ -17,16 +17,12 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class MqttPublisherNode extends ProtocolNode {
-    private final String serverHost;
-    private final int serverPort;
     private final String topic;
     private final MqttQos qos;
     private final Mqtt5BlockingClient client;
 
     private MqttPublisherNode(String id, String serverHost, int serverPort, String topic, int qos) {
         super(id);
-        this.serverHost = serverHost;
-        this.serverPort = serverPort;
         this.topic = topic;
         this.qos = MqttQos.fromCode(qos);
 
