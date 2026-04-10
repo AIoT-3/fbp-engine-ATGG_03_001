@@ -2,6 +2,9 @@ package com.nhnacademy.fbp;
 
 import com.nhnacademy.fbp.core.engine.FlowEngine;
 import com.nhnacademy.fbp.core.flow.Flow;
+import com.nhnacademy.fbp.infrastructure.modbus.ModbusTcpSimulator;
+import com.nhnacademy.fbp.node.modbus.ModbusReaderNode;
+import com.nhnacademy.fbp.node.modbus.ModbusWriterNode;
 import com.nhnacademy.fbp.node.mqtt.MqttPublisherNode;
 import com.nhnacademy.fbp.node.mqtt.MqttSubscriberNode;
 import com.nhnacademy.fbp.node.standard.*;
@@ -22,6 +25,7 @@ public class Main {
         initFlow2();
         initFlow3();
         initFlow4();
+        initFlow5();
 
         while (true) {
             System.out.print("fbp> ");
@@ -68,7 +72,7 @@ public class Main {
     private static void initFlow3() {
         String id = "mqtt-in";
         Flow flow = Flow.create("mqtt-subscribe-test")
-                .addNode(MqttSubscriberNode.create(id, "localhost", 1883, "#"))
+                .addNode(MqttSubscriberNode.create(id, "localhost", 1883, "test"))
                 .addNode(LogNode.create("log"));
 
         flow.connect(id, "log");
@@ -85,6 +89,27 @@ public class Main {
 
         flow.connect("timer", "out", "humidity", "trigger");
         flow.connect("humidity", id);
+
+        engine.register(flow);
+    }
+
+    private static void initFlow5() {
+        ModbusTcpSimulator simulator = ModbusTcpSimulator.create(5020, 100);
+        simulator.start();
+
+        Flow flow = Flow.create("modbus-integrated-test")
+                .addNode(TimerNode.create("timer-w", 1000))
+                .addNode(TemperatureSensorNode.create("temp-sensor", 20, 30))
+                .addNode(ModbusWriterNode.create("modbus-write", "localhost", 5020, 1, 0, "temperature", 10))
+                .addNode(TimerNode.create("timer-r", 2000))
+                .addNode(ModbusReaderNode.create("modbus-read", "localhost", 5020, 1, 0, 1))
+                .addNode(LogNode.create("log"));
+
+        flow.connect("timer-w", "out", "temp-sensor", "trigger")
+                .connect("temp-sensor", "out", "modbus-write", "in");
+
+        flow.connect("timer-r", "out", "modbus-read", "trigger")
+                .connect("modbus-read", "log");
 
         engine.register(flow);
     }
