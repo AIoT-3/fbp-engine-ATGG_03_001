@@ -5,24 +5,29 @@ import com.nhnacademy.fbp.core.node.ProtocolNode;
 import com.nhnacademy.fbp.infrastructure.modbus.ModbusTcpClient;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 public class ModbusReaderNode extends ProtocolNode {
-    private final String host;
-    private final int port;
     private final int slaveId;
     private final int startAddress;
     private final int count;
     private final ModbusTcpClient client;
+    private final Map<Integer, Map<String, Object>> registerMapping;
 
     private ModbusReaderNode(String id, String host, int port, int slaveId, int startAddress, int count) {
         super(id);
-        this.host = host;
-        this.port = port;
         this.slaveId = slaveId;
         this.startAddress = startAddress;
         this.count = count;
 
         client = ModbusTcpClient.create(host, port);
+
+        registerMapping = new HashMap<>();
+        registerMapping.put(0, Map.of("name", "temperature", "scale", 0.1));
+        registerMapping.put(1, Map.of("name", "humidity", "scale", 0.1));
+        registerMapping.put(2, Map.of("name", "status"));
 
         addInputPort("trigger");
         addOutputPort("out");
@@ -48,8 +53,16 @@ public class ModbusReaderNode extends ProtocolNode {
         int[] data = client.readHoldingRegisters(slaveId, startAddress, count);
         Message result = Message.create();
 
+        String entryName = String.valueOf(registerMapping.get(slaveId).get("name"));
+        Number scale = (Number) registerMapping.get(slaveId).get("scale");
+
+        if (scale == null) {
+            scale = 1;
+        }
+
         for (int i : data) {
-            result = result.withEntry("test", i);
+            String scaledValue = String.format("%.1f", i * scale.doubleValue());
+            result = result.withEntry(entryName, Double.parseDouble(scaledValue));
         }
 
         send("out", result);
