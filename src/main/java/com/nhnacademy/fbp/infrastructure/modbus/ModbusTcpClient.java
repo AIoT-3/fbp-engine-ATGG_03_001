@@ -1,5 +1,6 @@
 package com.nhnacademy.fbp.infrastructure.modbus;
 
+import com.nhnacademy.fbp.infrastructure.modbus.exception.ModbusConnectException;
 import com.nhnacademy.fbp.infrastructure.modbus.frame.*;
 import com.nhnacademy.fbp.infrastructure.modbus.frame.pdu.ReadHoldingRequestPdu;
 import com.nhnacademy.fbp.infrastructure.modbus.frame.pdu.ReadHoldingResponsePdu;
@@ -36,8 +37,8 @@ public class ModbusTcpClient {
             in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
         } catch (IOException e) {
-            // TODO: 적절한 처리
-            throw new RuntimeException(e);
+            log.error("Modbus 연결 실패: {}", e.getMessage());
+            throw new ModbusConnectException(e);
         }
     }
 
@@ -48,8 +49,7 @@ public class ModbusTcpClient {
                 out.close();
                 socket.close();
             } catch (IOException e) {
-                // TODO: 적절한 처리
-                throw new RuntimeException(e);
+                throw new ModbusConnectException(e);
             }
         }
     }
@@ -77,8 +77,7 @@ public class ModbusTcpClient {
             return result;
 
         } catch (IOException e) {
-            // TODO: 적절한 처리
-            throw new RuntimeException(e);
+            throw new ModbusConnectException(e);
         }
 
     }
@@ -93,13 +92,9 @@ public class ModbusTcpClient {
             out.flush();
 
             MBAPHeader responseHeader = MBAPHeader.read(in);
-            WriteSingleResponsePdu responsePdu = (WriteSingleResponsePdu) ModbusPdu.readResponse(in, responseHeader);
+            ModbusPdu.readResponse(in, responseHeader);
         } catch (IOException e) {
-            // TODO: 적절한 처리
-            throw new RuntimeException(e);
+            throw new ModbusConnectException(e);
         }
-
     }
-
-
 }

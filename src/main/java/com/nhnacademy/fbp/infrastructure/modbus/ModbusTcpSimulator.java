@@ -1,5 +1,6 @@
 package com.nhnacademy.fbp.infrastructure.modbus;
 
+import com.nhnacademy.fbp.infrastructure.modbus.exception.ModbusConnectException;
 import com.nhnacademy.fbp.infrastructure.modbus.exception.ModbusException;
 import com.nhnacademy.fbp.infrastructure.modbus.frame.*;
 import com.nhnacademy.fbp.infrastructure.modbus.frame.pdu.*;
@@ -10,11 +11,14 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 public class ModbusTcpSimulator {
     private final ServerSocket serverSocket;
     private final int[] registers;
+    private final ExecutorService executorService;
 
     @Getter
     private volatile boolean running;
@@ -23,9 +27,10 @@ public class ModbusTcpSimulator {
         try {
             serverSocket = new ServerSocket(port);
             registers = new int[registerCount];
+            executorService = Executors.newVirtualThreadPerTaskExecutor();
         } catch (IOException e) {
-            // TODO: 적절한 처리
-            throw new RuntimeException(e);
+            log.error("ModbusTcpSimulator 실행 실패: {}", e.getMessage());
+            throw new ModbusConnectException(e);
         }
     }
 
@@ -36,15 +41,13 @@ public class ModbusTcpSimulator {
     public void start() {
         running = true;
 
-        Thread.ofVirtual().start(() -> {
+        executorService.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     Socket client = serverSocket.accept();
-
                     handleClient(client);
                 } catch (IOException e) {
-                    // TODO: 적절한 처리
-                    throw new RuntimeException(e);
+                    log.warn("클라이언트 연결 실패: {}", e.getMessage());
                 }
             }
         });
@@ -52,12 +55,12 @@ public class ModbusTcpSimulator {
 
     public void stop() {
         try {
+            executorService.shutdownNow();
             serverSocket.close();
 
             running = false;
         } catch (IOException e) {
-            // TODO: 적절한 처리
-            throw new RuntimeException(e);
+            log.error("ModbusTcpSimulator 종료 실패: {}", e.getMessage(), e);
         }
     }
 
@@ -88,17 +91,17 @@ public class ModbusTcpSimulator {
     }
 
     private void handleClient(Socket client) {
-        Thread.ofVirtual().start(() -> {
-                try (DataInputStream in = new DataInputStream(new BufferedInputStream(client.getInputStream()));
-                     DataOutputStream out = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()))) {
+        executorService.submit(() -> {
+            try (client;
+                 DataInputStream in = new DataInputStream(new BufferedInputStream(client.getInputStream()));
+                 DataOutputStream out = new DataOutputStream(new BufferedOutputStream(client.getOutputStream()))) {
 
-                    while (!Thread.currentThread().isInterrupted()) {
-                        handleRequest(in, out);
-                    }
-                } catch (IOException e) {
-                    // TODO: 적절한 처리
-                    throw new RuntimeException(e);
+                while (!Thread.currentThread().isInterrupted()) {
+                    handleRequest(in, out);
                 }
+            } catch (IOException e) {
+                log.warn("클라이언트 연결 해제: {}", e.getMessage(), e);
+            }
         });
     }
 
