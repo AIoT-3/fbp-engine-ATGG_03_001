@@ -1,8 +1,10 @@
 package com.nhnacademy.fbp;
 
+import com.nhnacademy.fbp.common.parser.FlowParser;
 import com.nhnacademy.fbp.core.engine.FlowEngine;
 import com.nhnacademy.fbp.core.flow.Flow;
 import com.nhnacademy.fbp.infrastructure.modbus.ModbusTcpSimulator;
+import com.nhnacademy.fbp.infrastructure.parser.JsonFlowParser;
 import com.nhnacademy.fbp.node.modbus.ModbusReaderNode;
 import com.nhnacademy.fbp.node.modbus.ModbusWriterNode;
 import com.nhnacademy.fbp.node.mqtt.MqttPublisherNode;
@@ -19,7 +21,7 @@ public class Main {
     private static final int MQTT_PORT = 1883;
     private static final int MODBUS_PORT = 5020;
     private static final String HOST_NAME = "localhost";
-
+    private static final FlowParser parser = JsonFlowParser.create();
     private static final FlowEngine engine = FlowEngine.create();
 
     public static void main(String[] args) throws IOException {
@@ -42,24 +44,15 @@ public class Main {
     private static void init() {
         ModbusTcpSimulator simulator = ModbusTcpSimulator.create(MODBUS_PORT, 100);
         simulator.start();
-        temperatureMonitoring();
+        // temperatureMonitoring();
         temperatureAlert();
         mqttIn();
         mqttOut();
         modbusIntegrate();
         mqttRuleMqtt();
         crossProtocol();
-    }
 
-    private static void temperatureMonitoring() {
-        Flow flow = Flow.create("temperature-monitoring")
-                .addNode(TimerNode.create("timer", 1000))
-                .addNode(FilterNode.create("filter", "tick", 3))
-                .addNode(PrintNode.create("printer"));
-
-        flow.connect("timer", "filter")
-                .connect("filter", "printer");
-
+        Flow flow = parser.parse("temperature-monitoring.json");
         engine.register(flow);
     }
 

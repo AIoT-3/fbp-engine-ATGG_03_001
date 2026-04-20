@@ -1,0 +1,37 @@
+{
+  "id": "temperature-monitoring",
+  "name": "온도 모니터링",
+  "description": "TimerNode -> FilterNode -> PrintNode 흐름",
+  "nodes": [
+    {
+      "id": "timer",
+      "type": "TimerNode",
+      "config": {
+        "intervalMs": 1000
+      }
+    },
+    {
+      "id": "filter",
+      "type": "FilterNode",
+      "config": {
+        "key": "tick",
+        "threshold": 3
+      }
+    },
+    {
+      "id": "printer",
+      "type": "PrintNode",
+      "config": {}
+    }
+  ],
+  "connections": [
+    {
+      "from": "timer:out",
+      "to": "filter:in"
+    },
+    {
+      "from": "filter:out",
+      "to": "printer:in"
+    }
+  ]
+}
