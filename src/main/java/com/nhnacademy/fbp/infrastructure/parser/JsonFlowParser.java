@@ -31,7 +31,7 @@ public final class JsonFlowParser implements FlowParser {
 
             return flowConfig.toFlow(nodeFactory);
         } catch (IOException e) {
-            throw new FlowParseException(e);
+            throw new FlowParseException("Flow 파싱 중 오류 발생: " + e.getMessage());
         }
     }
 
