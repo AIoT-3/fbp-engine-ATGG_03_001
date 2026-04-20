@@ -69,12 +69,10 @@ public class MqttPublisherNode extends ProtocolNode {
     @Override
     protected void onProcess(Message message) {
         try {
-            String msgTopic = message.getPayload("topic");
-
             String json = JsonUtils.get().writeValueAsString(message);
 
             Mqtt5Publish publish = Mqtt5Publish.builder()
-                    .topic((msgTopic == null) ? topic : msgTopic)
+                    .topic(topic)
                     .payload(json.getBytes(StandardCharsets.UTF_8))
                     .qos(qos)
                     .build();
