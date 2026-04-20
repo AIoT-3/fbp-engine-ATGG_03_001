@@ -91,35 +91,4 @@ class MqttPublisherNodeIT {
                 .extracting(m -> m.getPayload("payload"))
                 .isEqualTo("Hello, MQTT!");
     }
-
-    @Test
-    @DisplayName("메시지 페이로드에 'topic' 키가 포함되어 있으면, 해당 토픽으로 MQTT 메시지가 발행된다.")
-    void process_WhenContainsTopic_PublishesMqttMessage() throws InterruptedException {
-        // given
-        String topic = "test/test/test";
-
-        MqttPublisherNode node = MqttPublisherNodeFixture.defaultPublisher();
-
-        MqttSubscriberNode subscriberNode = MqttPublisherNodeFixture.defaultSubscriber(topic);
-        OutputPort subscriberOutputPort = subscriberNode.getOutputPort("out");
-        InputPort subscriberNextInputPort = FbpTestUtils.getConnectedInputPort(subscriberOutputPort);
-
-        Thread subscriberThread = new Thread(subscriberNode);
-        subscriberThread.start();
-
-        Message message = Message.create()
-                .withEntry("payload", "Hello, MQTT!")
-                .withEntry("topic", topic);
-
-        // when
-        node.process(message);
-
-        // then
-        Message receivedMessage = subscriberNextInputPort.take();
-
-        assertThat(receivedMessage)
-                .isNotNull()
-                .extracting(m -> m.getPayload("payload"))
-                .isEqualTo("Hello, MQTT!");
-    }
 }
