@@ -16,16 +16,16 @@ import java.io.InputStreamReader;
 
 @Slf4j
 public class Main {
+    private static final int MQTT_PORT = 1883;
+    private static final int MODBUS_PORT = 5020;
+    private static final String HOST_NAME = "localhost";
+
     private static final FlowEngine engine = FlowEngine.create();
 
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-        initFlow1();
-        initFlow2();
-        initFlow3();
-        initFlow4();
-        initFlow5();
+        init();
 
         while (true) {
             System.out.print("fbp> ");
@@ -39,7 +39,19 @@ public class Main {
         }
     }
 
-    private static void initFlow1() {
+    private static void init() {
+        ModbusTcpSimulator simulator = ModbusTcpSimulator.create(MODBUS_PORT, 100);
+        simulator.start();
+        temperatureMonitoring();
+        temperatureAlert();
+        mqttIn();
+        mqttOut();
+        modbusIntegrate();
+        mqttRuleMqtt();
+        crossProtocol();
+    }
+
+    private static void temperatureMonitoring() {
         Flow flow = Flow.create("temperature-monitoring")
                 .addNode(TimerNode.create("timer", 1000))
                 .addNode(FilterNode.create("filter", "tick", 3))
@@ -51,7 +63,7 @@ public class Main {
         engine.register(flow);
     }
 
-    private static void initFlow2() {
+    private static void temperatureAlert() {
         Flow flow = Flow.create("temperature-alert")
                 .addNode(TimerNode.create("timer", 1000))
                 .addNode(TemperatureSensorNode.create("temperature", 15, 45))
@@ -69,10 +81,10 @@ public class Main {
         engine.register(flow);
     }
 
-    private static void initFlow3() {
+    private static void mqttIn() {
         String id = "mqtt-in";
         Flow flow = Flow.create("mqtt-subscribe-test")
-                .addNode(MqttSubscriberNode.create(id, "localhost", 1883, "test"))
+                .addNode(MqttSubscriberNode.create(id, HOST_NAME, MQTT_PORT, "test"))
                 .addNode(LogNode.create("log"));
 
         flow.connect(id, "log");
@@ -80,12 +92,12 @@ public class Main {
         engine.register(flow);
     }
 
-    private static void initFlow4() {
+    private static void mqttOut() {
         String id = "mqtt-out";
         Flow flow = Flow.create("mqtt-publish-test")
                 .addNode(TimerNode.create("timer", 1000))
                 .addNode(HumiditySensorNode.create("humidity", 40, 80))
-                .addNode(MqttPublisherNode.create(id, "localhost", 1883, "test"));
+                .addNode(MqttPublisherNode.create(id, HOST_NAME, MQTT_PORT, "test"));
 
         flow.connect("timer", "out", "humidity", "trigger");
         flow.connect("humidity", id);
@@ -93,16 +105,24 @@ public class Main {
         engine.register(flow);
     }
 
-    private static void initFlow5() {
-        ModbusTcpSimulator simulator = ModbusTcpSimulator.create(5020, 100);
-        simulator.start();
+    private static void mqttRuleMqtt() {
+        Flow flow = Flow.create("mqtt-rule-mqtt")
+                .addNode(MqttSubscriberNode.create("mqtt-sub", HOST_NAME, MQTT_PORT, "sensor/temp"))
+                .addNode(RuleNode.create("rule", "value > 30"))
+                .addNode(MqttPublisherNode.create("mqtt-pub", HOST_NAME, MQTT_PORT, "alert/temp"));
 
+        flow.connect("mqtt-sub", "rule").connect("rule", "match", "mqtt-pub", "in");
+
+        engine.register(flow);
+    }
+
+    private static void modbusIntegrate() {
         Flow flow = Flow.create("modbus-integrated-test")
                 .addNode(TimerNode.create("timer-w", 1000))
                 .addNode(TemperatureSensorNode.create("temp-sensor", 20, 30))
-                .addNode(ModbusWriterNode.create("modbus-write", "localhost", 5020, 1, 0, "temperature", 10))
+                .addNode(ModbusWriterNode.create("modbus-write", HOST_NAME, MODBUS_PORT, 0, 0, "temperature", 10))
                 .addNode(TimerNode.create("timer-r", 2000))
-                .addNode(ModbusReaderNode.create("modbus-read", "localhost", 5020, 1, 0, 1))
+                .addNode(ModbusReaderNode.create("modbus-read", HOST_NAME, MODBUS_PORT, 0, 0, 1))
                 .addNode(LogNode.create("log"));
 
         flow.connect("timer-w", "out", "temp-sensor", "trigger")
@@ -110,6 +130,24 @@ public class Main {
 
         flow.connect("timer-r", "out", "modbus-read", "trigger")
                 .connect("modbus-read", "log");
+
+        engine.register(flow);
+    }
+
+    private static void crossProtocol() {
+        Flow flow = Flow.create("cross-protocol")
+                .addNode(MqttSubscriberNode.create("mqtt-sub", HOST_NAME, MQTT_PORT, "sensor/temp"))
+                .addNode(RuleNode.create("rule", "temperature > 30"))
+                .addNode(ModbusWriterNode.create("modbus-write", HOST_NAME, MODBUS_PORT, 0, 0, "temperature", 10))
+                .addNode(TimerNode.create("timer", 1000))
+                .addNode(ModbusReaderNode.create("modbus-read", HOST_NAME, MODBUS_PORT, 0, 0, 1))
+                .addNode(LogNode.create("log"));
+
+        flow.connect("mqtt-sub", "rule")
+                .connect("timer", "out", "modbus-read", "trigger")
+                .connect("rule", "match", "modbus-write", "in");
+
+        flow.connect("modbus-read", "log");
 
         engine.register(flow);
     }
