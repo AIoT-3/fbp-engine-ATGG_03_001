@@ -1,13 +1,11 @@
 package com.nhnacademy.fbp.infrastructure.modbus;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("integration")
 class ModbusTcpClientIT {
     private ModbusTcpSimulator simulator;
     private ModbusTcpClient client;

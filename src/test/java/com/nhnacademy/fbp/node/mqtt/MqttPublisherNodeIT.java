@@ -5,12 +5,14 @@ import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
 import com.nhnacademy.fbp.core.utils.FbpTestUtils;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("integration")
 class MqttPublisherNodeIT {
 
     static class MqttPublisherNodeFixture {

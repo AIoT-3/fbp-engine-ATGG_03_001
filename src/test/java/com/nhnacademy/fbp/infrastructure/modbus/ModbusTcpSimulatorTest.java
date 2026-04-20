@@ -2,10 +2,12 @@ package com.nhnacademy.fbp.infrastructure.modbus;
 
 import com.nhnacademy.fbp.infrastructure.modbus.exception.ModbusException;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("integration")
 class ModbusTcpSimulatorTest {
     @Test
     @DisplayName("레지스터 범위를 벗어나는 값을 읽으려고 하면 ModbusException이 발생한다.")

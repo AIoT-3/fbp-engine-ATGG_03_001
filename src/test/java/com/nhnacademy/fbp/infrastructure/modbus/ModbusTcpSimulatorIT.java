@@ -2,16 +2,14 @@ package com.nhnacademy.fbp.infrastructure.modbus;
 
 import com.nhnacademy.fbp.infrastructure.modbus.frame.MBAPHeader;
 import com.nhnacademy.fbp.infrastructure.modbus.frame.pdu.WriteSingleRequestPdu;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.*;
 import java.net.Socket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("integration")
 class ModbusTcpSimulatorIT {
     private ModbusTcpSimulator simulator;
     private ModbusTcpClient client;
