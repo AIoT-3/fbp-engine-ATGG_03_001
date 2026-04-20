@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ModbusWriterNode extends ProtocolNode {
-    private final String host;
-    private final int port;
     private final int slaveId;
     private final int registerAddress;
     private final String valueField;
@@ -17,8 +15,6 @@ public class ModbusWriterNode extends ProtocolNode {
 
     private ModbusWriterNode(String id, String host, int port, int slaveId, int registerAddress, String valueField, double scale) {
         super(id);
-        this.host = host;
-        this.port = port;
         this.slaveId = slaveId;
         this.registerAddress = registerAddress;
         this.valueField = valueField;
