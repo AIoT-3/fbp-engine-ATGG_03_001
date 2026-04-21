@@ -1,12 +1,12 @@
 package com.nhnacademy.fbp;
 
-import com.nhnacademy.fbp.common.parser.FlowParser;
-import com.nhnacademy.fbp.common.parser.NodeFactory;
+import com.nhnacademy.fbp.core.parser.FlowParser;
+import com.nhnacademy.fbp.core.parser.NodeFactory;
 import com.nhnacademy.fbp.core.engine.FlowEngine;
 import com.nhnacademy.fbp.core.flow.Flow;
 import com.nhnacademy.fbp.infrastructure.modbus.ModbusTcpSimulator;
 import com.nhnacademy.fbp.infrastructure.parser.JsonFlowParser;
-import com.nhnacademy.fbp.node.external.PluginLoader;
+import com.nhnacademy.fbp.core.parser.plugin.PluginLoader;
 import com.nhnacademy.fbp.node.modbus.ModbusReaderNode;
 import com.nhnacademy.fbp.node.modbus.ModbusWriterNode;
 import com.nhnacademy.fbp.node.mqtt.MqttPublisherNode;

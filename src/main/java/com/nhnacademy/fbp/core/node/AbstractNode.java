@@ -28,7 +28,7 @@ public abstract class AbstractNode implements Node, Runnable {
 
     @Override
     public void process(Message message) {
-        // log.info("SENSOR-ID: {}, PAYLOAD: {}", id, message);
+        log.info("SENSOR-ID: {}, PAYLOAD: {}", id, message);
         onProcess(message);
     }
 

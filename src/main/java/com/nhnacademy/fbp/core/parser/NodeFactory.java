@@ -1,10 +1,10 @@
-package com.nhnacademy.fbp.common.parser;
+package com.nhnacademy.fbp.core.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.fbp.common.parser.exception.NodeParseException;
+import com.nhnacademy.fbp.core.parser.exception.NodeParseException;
 import com.nhnacademy.fbp.common.util.JsonUtils;
 import com.nhnacademy.fbp.core.node.AbstractNode;
-import com.nhnacademy.fbp.node.external.NodeProvider;
+import com.nhnacademy.fbp.node.plugin.NodeProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.reflections.Reflections;
 

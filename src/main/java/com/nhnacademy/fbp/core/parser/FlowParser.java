@@ -1,4 +1,4 @@
-package com.nhnacademy.fbp.common.parser;
+package com.nhnacademy.fbp.core.parser;
 
 import com.nhnacademy.fbp.core.flow.Flow;
 

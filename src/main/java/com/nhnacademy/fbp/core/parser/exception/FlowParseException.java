@@ -1,4 +1,4 @@
-package com.nhnacademy.fbp.common.parser.exception;
+package com.nhnacademy.fbp.core.parser.exception;
 
 public class FlowParseException extends RuntimeException {
     public FlowParseException(String message) {

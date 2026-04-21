@@ -1,5 +1,6 @@
-package com.nhnacademy.fbp.node.external;
+package com.nhnacademy.fbp.core.parser.plugin;
 
+import com.nhnacademy.fbp.node.plugin.NodeProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

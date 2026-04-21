@@ -1,6 +1,6 @@
-package com.nhnacademy.fbp.common.parser;
+package com.nhnacademy.fbp.core.parser;
 
-import com.nhnacademy.fbp.common.parser.exception.FlowParseException;
+import com.nhnacademy.fbp.core.parser.exception.FlowParseException;
 import com.nhnacademy.fbp.core.node.AbstractNode;
 
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package com.nhnacademy.fbp.common.parser.exception;
+package com.nhnacademy.fbp.core.parser.exception;
 
 public class NodeParseException extends RuntimeException {
     public NodeParseException(String message) {

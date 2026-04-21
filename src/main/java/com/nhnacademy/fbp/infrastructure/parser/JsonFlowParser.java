@@ -1,10 +1,10 @@
 package com.nhnacademy.fbp.infrastructure.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.fbp.common.parser.FlowConfig;
-import com.nhnacademy.fbp.common.parser.FlowParser;
-import com.nhnacademy.fbp.common.parser.NodeFactory;
-import com.nhnacademy.fbp.common.parser.exception.FlowParseException;
+import com.nhnacademy.fbp.core.parser.FlowConfig;
+import com.nhnacademy.fbp.core.parser.FlowParser;
+import com.nhnacademy.fbp.core.parser.NodeFactory;
+import com.nhnacademy.fbp.core.parser.exception.FlowParseException;
 import com.nhnacademy.fbp.common.util.JsonUtils;
 import com.nhnacademy.fbp.core.flow.Flow;
 

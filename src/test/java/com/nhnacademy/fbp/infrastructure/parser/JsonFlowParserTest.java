@@ -1,6 +1,6 @@
 package com.nhnacademy.fbp.infrastructure.parser;
 
-import com.nhnacademy.fbp.common.parser.NodeFactory;
+import com.nhnacademy.fbp.core.parser.NodeFactory;
 import com.nhnacademy.fbp.core.flow.Flow;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
