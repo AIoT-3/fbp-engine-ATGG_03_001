@@ -1,5 +1,6 @@
 package com.nhnacademy.fbp;
 
+import com.nhnacademy.fbp.infrastructure.http.HttpApiServer;
 import com.nhnacademy.fbp.core.parser.FlowParser;
 import com.nhnacademy.fbp.core.parser.NodeFactory;
 import com.nhnacademy.fbp.core.engine.FlowEngine;
@@ -26,12 +27,16 @@ public class Main {
     private static final PluginLoader pluginLoader = PluginLoader.create("plugin");
     private static final NodeFactory nodeFactory = NodeFactory.create(pluginLoader.getPlugins());
     private static final FlowParser parser = JsonFlowParser.create(nodeFactory);
-    private static final FlowEngine engine = FlowEngine.create();
+    private static final FlowEngine engine = FlowEngine.create(parser);
 
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
         init();
+
+        HttpApiServer httpApiServer = new HttpApiServer("localhost", 8080, engine);
+
+        httpApiServer.start();
 
         while (true) {
             System.out.print("fbp> ");

@@ -1,5 +1,6 @@
 package com.nhnacademy.fbp.infrastructure.parser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.fbp.common.util.JsonUtils;
 import com.nhnacademy.fbp.core.flow.Flow;
@@ -38,6 +39,17 @@ public final class JsonFlowParser implements FlowParser {
     @Override
     public Flow parse(String fileName) {
         return parse(getInputStream(fileName));
+    }
+
+    @Override
+    public Flow parseJson(String json) {
+        try {
+            FlowConfig flowConfig = objectMapper.readValue(json, FlowConfig.class);
+
+            return flowConfig.toFlow(nodeFactory);
+        } catch (JsonProcessingException e) {
+            throw new FlowParseException("Flow 파싱 중 오류 발생: " + e.getMessage());
+        }
     }
 
     private InputStream getInputStream(String fileName) {

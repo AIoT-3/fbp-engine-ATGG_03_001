@@ -3,6 +3,7 @@ package com.nhnacademy.fbp.core.engine;
 import com.nhnacademy.fbp.core.flow.Flow;
 import com.nhnacademy.fbp.core.flow.exception.FlowNotFoundException;
 import com.nhnacademy.fbp.core.flow.exception.FlowValidationException;
+import com.nhnacademy.fbp.core.parser.FlowParser;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,15 +18,28 @@ import java.util.concurrent.ConcurrentHashMap;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class FlowEngine {
+    private final FlowParser flowParser;
     private final Map<String, Flow> flows;
     private EngineState state;
 
-    public static FlowEngine create() {
-        return new FlowEngine(new ConcurrentHashMap<>(), EngineState.INITIALIZED);
+    public static FlowEngine create(FlowParser flowParser) {
+        return new FlowEngine(flowParser, new ConcurrentHashMap<>(), EngineState.INITIALIZED);
     }
 
     public void register(Flow flow) {
         flows.put(flow.getId(), flow);
+    }
+
+    public void register(String json) {
+        Flow flow = flowParser.parseJson(json);
+
+        register(flow);
+    }
+
+    public void remove(String flowId) {
+        Flow flow = getFlow(flowId);
+        flow.shutdown();
+        flows.remove(flowId);
     }
 
     public void startFlow(String flowId) {

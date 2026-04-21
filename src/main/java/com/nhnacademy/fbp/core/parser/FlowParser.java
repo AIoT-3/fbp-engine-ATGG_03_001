@@ -7,4 +7,5 @@ import java.io.InputStream;
 public interface FlowParser {
     Flow parse(InputStream in);
     Flow parse(String fileName);
+    Flow parseJson(String json);
 }
