@@ -1,4 +1,4 @@
-package com.nhnacademy.fbp.node.plugin;
+package com.nhnacademy.fbp.node.external;
 
 import com.nhnacademy.fbp.core.node.AbstractNode;
 

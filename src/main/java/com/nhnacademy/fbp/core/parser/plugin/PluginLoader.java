@@ -1,6 +1,6 @@
 package com.nhnacademy.fbp.core.parser.plugin;
 
-import com.nhnacademy.fbp.node.plugin.NodeProvider;
+import com.nhnacademy.fbp.node.external.NodeProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;

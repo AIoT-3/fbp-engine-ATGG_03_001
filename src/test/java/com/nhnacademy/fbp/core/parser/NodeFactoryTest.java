@@ -2,7 +2,7 @@ package com.nhnacademy.fbp.core.parser;
 
 import com.nhnacademy.fbp.core.parser.exception.NodeParseException;
 import com.nhnacademy.fbp.core.node.AbstractNode;
-import com.nhnacademy.fbp.node.plugin.NodeProvider;
+import com.nhnacademy.fbp.node.external.NodeProvider;
 import com.nhnacademy.fbp.core.parser.plugin.PluginLoader;
 import com.nhnacademy.fbp.node.standard.TimerNode;
 import org.junit.jupiter.api.DisplayName;

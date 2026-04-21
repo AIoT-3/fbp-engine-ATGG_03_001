@@ -13,9 +13,7 @@
     {
       "id": "hello-world",
       "type": "HelloWorldNode",
-      "config": {
-        "config": {}
-      }
+      "config": {}
     }
   ],
   "connections": [
