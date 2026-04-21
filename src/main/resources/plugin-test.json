@@ -1,0 +1,27 @@
+{
+  "id": "external-plugin-test",
+  "name": "외부 플러그인 테스트",
+  "description": "TimerNode -> HelloWorldNode(외부 플러그인)",
+  "nodes": [
+    {
+      "id": "timer",
+      "type": "TimerNode",
+      "config": {
+        "intervalMs": 1000
+      }
+    },
+    {
+      "id": "hello-world",
+      "type": "HelloWorldNode",
+      "config": {
+        "config": {}
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from": "timer:out",
+      "to": "hello-world:in"
+    }
+  ]
+}

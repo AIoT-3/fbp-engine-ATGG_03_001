@@ -1,10 +1,12 @@
 package com.nhnacademy.fbp;
 
 import com.nhnacademy.fbp.common.parser.FlowParser;
+import com.nhnacademy.fbp.common.parser.NodeFactory;
 import com.nhnacademy.fbp.core.engine.FlowEngine;
 import com.nhnacademy.fbp.core.flow.Flow;
 import com.nhnacademy.fbp.infrastructure.modbus.ModbusTcpSimulator;
 import com.nhnacademy.fbp.infrastructure.parser.JsonFlowParser;
+import com.nhnacademy.fbp.node.external.PluginLoader;
 import com.nhnacademy.fbp.node.modbus.ModbusReaderNode;
 import com.nhnacademy.fbp.node.modbus.ModbusWriterNode;
 import com.nhnacademy.fbp.node.mqtt.MqttPublisherNode;
@@ -21,7 +23,9 @@ public class Main {
     private static final int MQTT_PORT = 1883;
     private static final int MODBUS_PORT = 5020;
     private static final String HOST_NAME = "localhost";
-    private static final FlowParser parser = JsonFlowParser.create();
+    private static final PluginLoader pluginLoader = PluginLoader.create("plugin");
+    private static final NodeFactory nodeFactory = NodeFactory.create(pluginLoader.getPlugins());
+    private static final FlowParser parser = JsonFlowParser.create(nodeFactory);
     private static final FlowEngine engine = FlowEngine.create();
 
     public static void main(String[] args) throws IOException {
@@ -54,6 +58,9 @@ public class Main {
 
         Flow flow = parser.parse("temperature-monitoring.json");
         engine.register(flow);
+
+        Flow externalPlugin = parser.parse("plugin-test.json");
+        engine.register(externalPlugin);
     }
 
     private static void temperatureAlert() {
@@ -151,14 +158,18 @@ public class Main {
         String prompt = parts[0].trim();
         String param = parts.length > 1 ? parts[1].trim() : "";
 
-        switch (prompt) {
-            case "list" -> engine.listFlows().forEach(System.out::println);
-            case "start" -> engine.startFlow(param);
-            case "stop" -> engine.stopFlow(param);
-            case "exit" -> engine.shutdown();
-            default -> {
-                return;
+        try {
+            switch (prompt) {
+                case "list" -> engine.listFlows().forEach(System.out::println);
+                case "start" -> engine.startFlow(param);
+                case "stop" -> engine.stopFlow(param);
+                case "exit" -> engine.shutdown();
+                default -> {
+                    return;
+                }
             }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 }

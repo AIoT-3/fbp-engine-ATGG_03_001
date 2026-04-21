@@ -15,13 +15,13 @@ public final class JsonFlowParser implements FlowParser {
     private final NodeFactory nodeFactory;
     private final ObjectMapper objectMapper;
 
-    private JsonFlowParser() {
-        this.nodeFactory = NodeFactory.create();
+    private JsonFlowParser(NodeFactory nodeFactory) {
+        this.nodeFactory = nodeFactory;
         this.objectMapper = JsonUtils.get();
     }
 
-    public static JsonFlowParser create() {
-        return new JsonFlowParser();
+    public static JsonFlowParser create(NodeFactory nodeFactory) {
+        return new JsonFlowParser(nodeFactory);
     }
 
     @Override

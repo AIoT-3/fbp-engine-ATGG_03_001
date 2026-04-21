@@ -1,10 +1,12 @@
 package com.nhnacademy.fbp.infrastructure.parser;
 
+import com.nhnacademy.fbp.common.parser.NodeFactory;
 import com.nhnacademy.fbp.core.flow.Flow;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -15,7 +17,8 @@ class JsonFlowParserTest {
     @DisplayName("JSON 스트림으로부터 Flow 객체를 생성할 수 있다.")
     void parse_WhenValidStream_ReturnsFlow() {
         // given
-        JsonFlowParser parser = JsonFlowParser.create();
+        NodeFactory nodeFactory = NodeFactory.create(Map.of());
+        JsonFlowParser parser = JsonFlowParser.create(nodeFactory);
         InputStream inputStream = getClass().getResourceAsStream("/test-flow.json");
 
         // when
