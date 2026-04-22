@@ -1,14 +1,11 @@
 package com.nhnacademy.fbp.core.connection;
 
-import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.message.Message;
 import com.nhnacademy.fbp.core.port.InputPort;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Connection {

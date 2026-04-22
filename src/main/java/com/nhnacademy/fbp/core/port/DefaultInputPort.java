@@ -1,6 +1,6 @@
 package com.nhnacademy.fbp.core.port;
 
-import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.message.Message;
 import com.nhnacademy.fbp.core.node.AbstractNode;
 import lombok.Getter;
 

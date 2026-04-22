@@ -32,7 +32,7 @@ public record FlowConfig(
     }
 
     public Flow toFlow(NodeFactory factory) {
-        Flow flow = Flow.create(id);
+        Flow flow = Flow.create(id, name);
 
         nodes.stream()
                 .map(factory::createNode)

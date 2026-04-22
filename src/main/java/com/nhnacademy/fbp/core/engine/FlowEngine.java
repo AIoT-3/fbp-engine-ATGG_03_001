@@ -1,94 +1,112 @@
 package com.nhnacademy.fbp.core.engine;
 
+import com.nhnacademy.fbp.core.engine.dto.FlowListResponse;
+import com.nhnacademy.fbp.core.engine.dto.HealthResponse;
+import com.nhnacademy.fbp.core.engine.dto.MetricResponse;
 import com.nhnacademy.fbp.core.flow.Flow;
+import com.nhnacademy.fbp.core.flow.FlowService;
 import com.nhnacademy.fbp.core.flow.exception.FlowNotFoundException;
-import com.nhnacademy.fbp.core.flow.exception.FlowValidationException;
-import com.nhnacademy.fbp.core.parser.FlowParser;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import com.nhnacademy.fbp.core.node.exception.NodeNotFoundException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class FlowEngine {
-    private final FlowParser flowParser;
-    private final Map<String, Flow> flows;
+    private final Map<String, FlowMetrics> registry = new ConcurrentHashMap<>();
+    private final FlowService flowService;
     private EngineState state;
 
-    public static FlowEngine create(FlowParser flowParser) {
-        return new FlowEngine(flowParser, new ConcurrentHashMap<>(), EngineState.INITIALIZED);
+    private FlowEngine(FlowService flowService) {
+        this.flowService = flowService;
+        state = EngineState.INITIALIZED;
+    }
+
+    public static FlowEngine create(FlowService flowService) {
+        return new FlowEngine(flowService);
     }
 
     public void register(Flow flow) {
-        flows.put(flow.getId(), flow);
+        FlowMetrics metrics = registry.computeIfAbsent(flow.getId(), FlowMetrics::create);
+        flow.setupMonitoring(metrics);
+
+        flowService.register(flow);
     }
 
     public void register(String json) {
-        Flow flow = flowParser.parseJson(json);
+        Flow flow = flowService.register(json);
 
-        register(flow);
+        FlowMetrics metrics = registry.computeIfAbsent(flow.getId(), FlowMetrics::create);
+        flow.setupMonitoring(metrics);
     }
 
     public void remove(String flowId) {
-        Flow flow = getFlow(flowId);
-        flow.shutdown();
-        flows.remove(flowId);
+        flowService.stopFlow(flowId);
+        flowService.removeFlow(flowId);
+        registry.remove(flowId);
     }
 
     public void startFlow(String flowId) {
-        Flow flow = getFlow(flowId);
-
-        validateFlow(flow);
-
-        flow.initialize();
-
-        state = EngineState.RUNNING;
-
-        log.info("[Engine] 플로우 '{}' 시작됨.", flowId);
+        flowService.startFlow(flowId);
     }
 
     public void stopFlow(String flowId) {
-        Flow flow = getFlow(flowId);
-
-        flow.shutdown();
-
-        log.info("[Engine] 플로우 '{}' 정지됨.", flowId);
+        flowService.stopFlow(flowId);
     }
 
     public void shutdown() {
-        flows.values().forEach(Flow::shutdown);
-
+        flowService.stopAll();
         state = EngineState.STOPPED;
-
-        log.info("[Engine] 엔진 종료됨.");
     }
 
     public List<String> listFlows() {
-        List<Flow> flowList = new ArrayList<>(flows.values());
+        List<Flow> flowList = flowService.getAllFlow();
 
         return flowList.stream()
                 .map(flow -> String.format("[%d] %s %s", flowList.indexOf(flow) + 1, flow.getId(), flow.getState()))
                 .toList();
     }
 
-    private Flow getFlow(String flowId) {
-        if (!flows.containsKey(flowId)) {
+    public MetricResponse getFlowSummary(String flowId) {
+        FlowMetrics flowMetrics = getFlowMetric(flowId);
+
+        NodeMetrics summaryMetrics = flowMetrics.getFlowSummary();
+
+        return MetricResponse.of(flowId, summaryMetrics);
+    }
+
+    public MetricResponse getNodeMetric(String flowId, String nodeId) {
+        FlowMetrics flowMetrics = getFlowMetric(flowId);
+
+        NodeMetrics nodeMetrics = flowMetrics.getNodeMetric(nodeId)
+                .orElseThrow(NodeNotFoundException::new);
+
+        return MetricResponse.of(nodeId, nodeMetrics);
+    }
+
+    private FlowMetrics getFlowMetric(String flowId) {
+        FlowMetrics flowMetrics = registry.get(flowId);
+
+        if (flowMetrics == null) {
             throw new FlowNotFoundException();
         }
 
-        return flows.get(flowId);
+        return flowMetrics;
     }
 
-    private void validateFlow(Flow flow) {
-        if (!flow.validate().isEmpty()) {
-            throw new FlowValidationException();
-        }
+    public HealthResponse getHealth() {
+        int flowCount = flowService.getCount();
+
+        return new HealthResponse(state.name(), flowCount);
+    }
+
+    public List<FlowListResponse> getAllFlow() {
+        return flowService.getAllFlow().stream()
+                .map(FlowListResponse::from)
+                .toList();
     }
 }

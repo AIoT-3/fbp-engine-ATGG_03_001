@@ -1,7 +1,9 @@
 package com.nhnacademy.fbp.core.flow;
 
 import com.nhnacademy.fbp.core.connection.Connection;
+import com.nhnacademy.fbp.core.engine.MetricCollector;
 import com.nhnacademy.fbp.core.flow.exception.CircularConnectionException;
+import com.nhnacademy.fbp.core.flow.exception.FlowValidationException;
 import com.nhnacademy.fbp.core.node.AbstractNode;
 import com.nhnacademy.fbp.core.node.exception.NodeNotFoundException;
 import com.nhnacademy.fbp.core.port.InputPort;
@@ -20,13 +22,15 @@ public class Flow {
     private static final String DEFAULT_OUTPUT_PORT = "out";
 
     private final String id;
+    private String name;
     private final Map<String, AbstractNode> nodes;
     private final List<Connection> connections;
     private ExecutorService executorService;
     private FlowState state;
 
-    private Flow(String id) {
+    private Flow(String id, String name) {
         this.id = id;
+        this.name = name;
         state = FlowState.STOPPED;
 
         nodes = new HashMap<>();
@@ -34,8 +38,8 @@ public class Flow {
         executorService = Executors.newVirtualThreadPerTaskExecutor();
     }
 
-    public static Flow create(String id) {
-        return new Flow(id);
+    public static Flow create(String id, String name) {
+        return new Flow(id, name);
     }
 
     public Flow addNode(AbstractNode node) {
@@ -95,21 +99,21 @@ public class Flow {
         state = FlowState.STOPPED;
     }
 
-    public List<String> validate() {
-        List<String> messages = new ArrayList<>();
-
+    public void validate() {
         if (nodes.isEmpty()) {
-            messages.add("노드가 존재하지 않습니다.");
+            throw new FlowValidationException();
         }
 
         try {
             nodes.values()
                     .forEach(node -> checkCircularDependency(node, new HashSet<>()));
         } catch (CircularConnectionException e) {
-            messages.add("순환 참조가 발견되었습니다.");
+            throw new FlowValidationException();
         }
+    }
 
-        return messages;
+    public void setupMonitoring(MetricCollector metricCollector) {
+        nodes.values().forEach(node -> node.setupMonitoring(metricCollector));
     }
 
     private void checkCircularDependency(AbstractNode node, Set<AbstractNode> visited) {

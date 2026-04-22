@@ -1,6 +1,8 @@
 package com.nhnacademy.fbp.core.node;
 
-import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.engine.MetricCollector;
+import com.nhnacademy.fbp.core.engine.NoOpMetricCollector;
+import com.nhnacademy.fbp.core.message.Message;
 import com.nhnacademy.fbp.core.port.DefaultInputPort;
 import com.nhnacademy.fbp.core.port.DefaultOutputPort;
 import com.nhnacademy.fbp.core.port.InputPort;
@@ -17,11 +19,14 @@ public abstract class AbstractNode implements Node, Runnable {
     private final String id;
     private final Map<String, InputPort> inputPorts;
     private final Map<String, OutputPort> outputPorts;
+    private MetricCollector metricCollector;
 
     protected AbstractNode(String id) {
         this.id = id;
         inputPorts = new HashMap<>();
         outputPorts = new HashMap<>();
+
+        metricCollector = NoOpMetricCollector.get();
     }
 
     protected abstract void onProcess(Message message);
@@ -29,7 +34,18 @@ public abstract class AbstractNode implements Node, Runnable {
     @Override
     public void process(Message message) {
         log.info("SENSOR-ID: {}, PAYLOAD: {}", id, message);
-        onProcess(message);
+        try {
+            long start = System.currentTimeMillis();
+            onProcess(message);
+            long end = System.currentTimeMillis();
+
+            long duration = end - start;
+
+            metricCollector.record(id, duration);
+        } catch (Exception e) {
+            metricCollector.recordError(id);
+            throw e;
+        }
     }
 
     protected void addInputPort(String name) {
@@ -50,6 +66,10 @@ public abstract class AbstractNode implements Node, Runnable {
 
     public OutputPort getOutputPort(String name) {
         return outputPorts.get(name);
+    }
+
+    public void setupMonitoring(MetricCollector metricCollector) {
+        this.metricCollector = metricCollector;
     }
 
     protected Message takeMessage(String inputPortName) throws InterruptedException {

@@ -1,6 +1,6 @@
 package com.nhnacademy.fbp.node.modbus;
 
-import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.message.Message;
 import com.nhnacademy.fbp.core.node.ProtocolNode;
 import com.nhnacademy.fbp.infrastructure.modbus.ModbusTcpClient;
 import lombok.extern.slf4j.Slf4j;

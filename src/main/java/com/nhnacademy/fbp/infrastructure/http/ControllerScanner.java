@@ -22,7 +22,7 @@ public class ControllerScanner {
 
     public List<Route> scan() {
         try {
-            Reflections reflections = new Reflections("com.nhnacademy.fbp.api.controller");
+            Reflections reflections = new Reflections("com.nhnacademy.fbp.infrastructure.http.controller");
 
             Set<Class<?>> controllers = reflections.getTypesAnnotatedWith(RestController.class);
 

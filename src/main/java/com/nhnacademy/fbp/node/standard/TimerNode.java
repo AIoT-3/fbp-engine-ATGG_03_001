@@ -1,7 +1,7 @@
 package com.nhnacademy.fbp.node.standard;
 
 import ch.qos.logback.core.util.ExecutorServiceUtil;
-import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.message.Message;
 import com.nhnacademy.fbp.core.node.AbstractNode;
 
 import java.util.concurrent.ScheduledExecutorService;

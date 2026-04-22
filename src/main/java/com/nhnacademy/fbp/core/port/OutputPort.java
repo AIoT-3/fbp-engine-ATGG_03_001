@@ -1,7 +1,7 @@
 package com.nhnacademy.fbp.core.port;
 
 import com.nhnacademy.fbp.core.connection.Connection;
-import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.message.Message;
 
 import java.util.List;
 

@@ -1,5 +1,7 @@
 package com.nhnacademy.fbp;
 
+import com.nhnacademy.fbp.core.flow.FlowMemoryRepository;
+import com.nhnacademy.fbp.core.flow.FlowService;
 import com.nhnacademy.fbp.infrastructure.http.HttpApiServer;
 import com.nhnacademy.fbp.core.parser.FlowParser;
 import com.nhnacademy.fbp.core.parser.NodeFactory;
@@ -27,7 +29,8 @@ public class Main {
     private static final PluginLoader pluginLoader = PluginLoader.create("plugin");
     private static final NodeFactory nodeFactory = NodeFactory.create(pluginLoader.getPlugins());
     private static final FlowParser parser = JsonFlowParser.create(nodeFactory);
-    private static final FlowEngine engine = FlowEngine.create(parser);
+    private static final FlowService flowService = new FlowService(new FlowMemoryRepository(), parser);
+    private static final FlowEngine engine = FlowEngine.create(flowService);
 
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -69,7 +72,7 @@ public class Main {
     }
 
     private static void temperatureAlert() {
-        Flow flow = Flow.create("temperature-alert")
+        Flow flow = Flow.create("temperature-alert", "온도 알림")
                 .addNode(TimerNode.create("timer", 1000))
                 .addNode(TemperatureSensorNode.create("temperature", 15, 45))
                 .addNode(ThresholdFilterNode.create("threshold", "temperature", 30))
@@ -88,7 +91,7 @@ public class Main {
 
     private static void mqttIn() {
         String id = "mqtt-in";
-        Flow flow = Flow.create("mqtt-subscribe-test")
+        Flow flow = Flow.create("mqtt-subscribe-test", "MQTT 구독")
                 .addNode(MqttSubscriberNode.create(id, HOST_NAME, MQTT_PORT, "test"))
                 .addNode(LogNode.create("log"));
 
@@ -99,7 +102,7 @@ public class Main {
 
     private static void mqttOut() {
         String id = "mqtt-out";
-        Flow flow = Flow.create("mqtt-publish-test")
+        Flow flow = Flow.create("mqtt-publish-test", "MQTT 발행")
                 .addNode(TimerNode.create("timer", 1000))
                 .addNode(HumiditySensorNode.create("humidity", 40, 80))
                 .addNode(MqttPublisherNode.create(id, HOST_NAME, MQTT_PORT, "test"));
@@ -111,7 +114,7 @@ public class Main {
     }
 
     private static void mqttRuleMqtt() {
-        Flow flow = Flow.create("mqtt-rule-mqtt")
+        Flow flow = Flow.create("mqtt-rule-mqtt", "MQTT -> Rule -> MQTT")
                 .addNode(MqttSubscriberNode.create("mqtt-sub", HOST_NAME, MQTT_PORT, "sensor/temp"))
                 .addNode(RuleNode.create("rule", "value > 30"))
                 .addNode(MqttPublisherNode.create("mqtt-pub", HOST_NAME, MQTT_PORT, "alert/temp"));
@@ -122,7 +125,7 @@ public class Main {
     }
 
     private static void modbusIntegrate() {
-        Flow flow = Flow.create("modbus-integrated-test")
+        Flow flow = Flow.create("modbus-integrated-test", "모드버스 통합 테스트")
                 .addNode(TimerNode.create("timer-w", 1000))
                 .addNode(TemperatureSensorNode.create("temp-sensor", 20, 30))
                 .addNode(ModbusWriterNode.create("modbus-write", HOST_NAME, MODBUS_PORT, 0, 0, "temperature", 10))
@@ -140,7 +143,7 @@ public class Main {
     }
 
     private static void crossProtocol() {
-        Flow flow = Flow.create("cross-protocol")
+        Flow flow = Flow.create("cross-protocol", "Modbus-MQTT 테스트")
                 .addNode(MqttSubscriberNode.create("mqtt-sub", HOST_NAME, MQTT_PORT, "sensor/temp"))
                 .addNode(RuleNode.create("rule", "temperature > 30"))
                 .addNode(ModbusWriterNode.create("modbus-write", HOST_NAME, MODBUS_PORT, 0, 0, "temperature", 10))

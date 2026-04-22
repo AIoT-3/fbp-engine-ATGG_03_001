@@ -7,7 +7,7 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import com.nhnacademy.fbp.common.util.JsonUtils;
-import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.message.Message;
 import com.nhnacademy.fbp.core.node.ConnectionState;
 import com.nhnacademy.fbp.core.node.ProtocolNode;
 import lombok.extern.slf4j.Slf4j;
