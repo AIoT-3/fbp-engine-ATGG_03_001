@@ -1,6 +1,7 @@
 package com.nhnacademy.fbp.core.flow;
 
 import com.nhnacademy.fbp.core.connection.Connection;
+import com.nhnacademy.fbp.core.flow.exception.FlowValidationException;
 import com.nhnacademy.fbp.core.node.AbstractNode;
 import com.nhnacademy.fbp.core.node.exception.NodeNotFoundException;
 import com.nhnacademy.fbp.node.standard.LogNode;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -36,7 +38,7 @@ class FlowTest {
         }
 
         static Flow defaultFlow() {
-            return Flow.create("test");
+            return Flow.create("test", "test");
         }
     }
 
@@ -44,7 +46,7 @@ class FlowTest {
     @DisplayName("노드가 등록되면, getNodes()로 해당 노드를 조회할 수 있다.")
     void addNode_WhenAddNodeAndGetNodes_ReturnsNodes() {
         // given
-        Flow flow = Flow.create("test");
+        Flow flow = FlowFixture.defaultFlow();
 
         AbstractNode node = mock(AbstractNode.class);
 
@@ -67,7 +69,7 @@ class FlowTest {
         AbstractNode source = FlowFixture.defaultSource();
         AbstractNode target = FlowFixture.defaultTarget();
 
-        Flow flow = Flow.create("test")
+        Flow flow = FlowFixture.defaultFlow()
                 .addNode(source)
                 .addNode(target);
 
@@ -89,7 +91,7 @@ class FlowTest {
         String sourceId = "non-existent-node";
         AbstractNode target = FlowFixture.defaultTarget();
 
-        Flow flow = Flow.create("test")
+        Flow flow = FlowFixture.defaultFlow()
                 .addNode(target);
 
         // when & then
@@ -104,7 +106,7 @@ class FlowTest {
         String targetId = "non-existent-node";
         AbstractNode source = FlowFixture.defaultSource();
 
-        Flow flow = Flow.create("test")
+        Flow flow = FlowFixture.defaultFlow()
                 .addNode(source);
 
         // when & then
@@ -121,7 +123,7 @@ class FlowTest {
         AbstractNode source = FlowFixture.defaultSource();
         AbstractNode target = FlowFixture.defaultTarget();
 
-        Flow flow = Flow.create("test")
+        Flow flow = FlowFixture.defaultFlow()
                 .addNode(source)
                 .addNode(target);
 
@@ -139,7 +141,7 @@ class FlowTest {
         AbstractNode source = FlowFixture.defaultSource();
         AbstractNode target = FlowFixture.defaultTarget();
 
-        Flow flow = Flow.create("test")
+        Flow flow = FlowFixture.defaultFlow()
                 .addNode(source)
                 .addNode(target);
 
@@ -149,23 +151,18 @@ class FlowTest {
     }
 
     @Test
-    @DisplayName("노드가 존재하지 않는 경우, validate()를 호출하면 에러 메시지가 반환된다.")
-    void validate_WhenNodeEmpty_ReturnsErrorMessage() {
+    @DisplayName("노드가 존재하지 않는 경우, validate()를 호출하면 FlowValidationException이 발생한다.")
+    void validate_WhenNodeEmpty_ThrowsException() {
         // given
-        Flow flow = Flow.create("test");
+        Flow flow = FlowFixture.defaultFlow();
 
-        // when
-        List<String> messages = flow.validate();
-
-        // then
-        assertThat(messages)
-                .isNotNull()
-                .hasSize(1)
-                .contains("노드가 존재하지 않습니다.");
+        // when & then
+        assertThatThrownBy(flow::validate)
+                .isInstanceOf(FlowValidationException.class);
     }
 
     @Test
-    @DisplayName("유효한 노드와 연결이 존재하는 경우, validate()를 호출하면 빈 리스트가 반환된다.")
+    @DisplayName("유효한 노드와 연결이 존재하는 경우, validate()를 호출하면 아무런 예외가 발생하지 않는다.")
     void validate_WhenValid_ReturnsEmptyList() {
         // given
         AbstractNode node1 = FlowFixture.defaultSource();
@@ -176,18 +173,13 @@ class FlowTest {
                 .addNode(node2)
                 .connect(FlowFixture.SOURCE_ID, FlowFixture.TARGET_ID);
 
-        // when
-        List<String> messages = flow.validate();
-
-        // then
-        assertThat(messages)
-                .isNotNull()
-                .isEmpty();
+        // when & then
+        assertDoesNotThrow(flow::validate);
     }
 
     @Test
-    @DisplayName("순환 연결이 존재하는 경우, validate()를 호출하면 에러 메시지가 반환된다.")
-    void validate_WhenCircularConnectionExists_ReturnsErrorMessage() {
+    @DisplayName("순환 연결이 존재하는 경우, validate()를 호출하면 FlowValidationException이 발생한다.")
+    void validate_WhenCircularConnectionExists_ThrowsException() {
         // given
         AbstractNode node1 = FlowFixture.defaultSource();
         AbstractNode node2 = FlowFixture.defaultTarget();
@@ -198,14 +190,9 @@ class FlowTest {
                 .connect(FlowFixture.SOURCE_ID, FlowFixture.TARGET_ID)
                 .connect(FlowFixture.TARGET_ID, FlowFixture.SOURCE_ID);
 
-        // when
-        List<String> messages = flow.validate();
-
-        // then
-        assertThat(messages)
-                .isNotNull()
-                .hasSize(1)
-                .contains("순환 참조가 발견되었습니다.");
+        // when & then
+        assertThatThrownBy(flow::validate)
+                .isInstanceOf(FlowValidationException.class);
     }
 
     @Test
@@ -218,7 +205,7 @@ class FlowTest {
         given(node1.getId()).willReturn("1");
         given(node2.getId()).willReturn("2");
 
-        Flow flow = Flow.create("test")
+        Flow flow = FlowFixture.defaultFlow()
                 .addNode(node1)
                 .addNode(node2);
 
@@ -245,7 +232,7 @@ class FlowTest {
         given(node1.getId()).willReturn("1");
         given(node2.getId()).willReturn("2");
 
-        Flow flow = Flow.create("test")
+        Flow flow = FlowFixture.defaultFlow()
                 .addNode(node1)
                 .addNode(node2);
 

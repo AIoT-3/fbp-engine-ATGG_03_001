@@ -1,4 +1,4 @@
-package com.nhnacademy.fbp.core.messsage;
+package com.nhnacademy.fbp.core.message;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

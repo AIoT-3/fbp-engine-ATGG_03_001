@@ -1,6 +1,6 @@
 package com.nhnacademy.fbp.core.node;
 
-import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.message.Message;
 import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
 import org.junit.jupiter.api.DisplayName;

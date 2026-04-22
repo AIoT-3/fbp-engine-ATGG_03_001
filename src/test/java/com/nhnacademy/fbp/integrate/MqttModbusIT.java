@@ -1,8 +1,10 @@
 package com.nhnacademy.fbp.integrate;
 
-import com.nhnacademy.fbp.core.engine.FlowEngine;
 import com.nhnacademy.fbp.core.flow.Flow;
-import com.nhnacademy.fbp.core.messsage.Message;
+import com.nhnacademy.fbp.core.flow.FlowMemoryRepository;
+import com.nhnacademy.fbp.core.flow.FlowService;
+import com.nhnacademy.fbp.core.message.Message;
+import com.nhnacademy.fbp.core.parser.FlowParser;
 import com.nhnacademy.fbp.infrastructure.modbus.ModbusTcpSimulator;
 import com.nhnacademy.fbp.node.modbus.ModbusReaderNode;
 import com.nhnacademy.fbp.node.modbus.ModbusWriterNode;
@@ -22,9 +24,16 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.mock;
 
 @Tag("integration")
 class MqttModbusIT {
+
+    static class TestFixture {
+        static FlowService defaultFlowService() {
+            return new FlowService(new FlowMemoryRepository(), mock(FlowParser.class));
+        }
+    }
 
     @Test
     @DisplayName("MQTT로 발행한 메시지가 RuleNode를 통해 올바르게 분기된다.")
@@ -38,7 +47,7 @@ class MqttModbusIT {
         CollectorNode matchCollectNode = CollectorNode.create("match-collector");
         CollectorNode mismatchCollectorNode = CollectorNode.create("mismatch-collector");
 
-        Flow flow = Flow.create("mqtt-rule")
+        Flow flow = Flow.create("mqtt-rule", "test")
                 .addNode(mqttPublisherNode)
                 .addNode(mqttSubscriberNode)
                 .addNode(timerNode)
@@ -53,12 +62,12 @@ class MqttModbusIT {
         flow.connect("rule", "match", "match-collector", "in");
         flow.connect("rule", "mismatch", "mismatch-collector", "in");
 
-        FlowEngine engine = FlowEngine.create();
+        FlowService flowService = TestFixture.defaultFlowService();
 
-        engine.register(flow);
+        flowService.register(flow);
 
         // when
-        engine.startFlow("mqtt-rule");
+        flowService.startFlow("mqtt-rule");
 
         // then
         await().atMost(5, TimeUnit.SECONDS)
@@ -87,7 +96,7 @@ class MqttModbusIT {
                             .isLessThanOrEqualTo(30);
         });
 
-        engine.stopFlow("mqtt-rule");
+        flowService.stopFlow("mqtt-rule");
     }
 
     @Test
@@ -102,7 +111,7 @@ class MqttModbusIT {
         ModbusReaderNode modbusReaderNode = ModbusReaderNode.create("modbus-read", "localhost", 5020, 0, 0, 1);
         CollectorNode collectorNode = CollectorNode.create("collector");
 
-        Flow flow = Flow.create("mqtt-rule")
+        Flow flow = Flow.create("mqtt-rule", "test")
                 .addNode(timerNode)
                 .addNode(temperatureSensorNode)
                 .addNode(modbusWriterNode)
@@ -114,13 +123,13 @@ class MqttModbusIT {
 
         flow.connect("modbus-read", "collector");
 
-        FlowEngine engine = FlowEngine.create();
+        FlowService flowService = TestFixture.defaultFlowService();
 
-        engine.register(flow);
+        flowService.register(flow);
 
         // when
         simulator.start();
-        engine.startFlow("mqtt-rule");
+        flowService.startFlow("mqtt-rule");
 
         // then
         await().atMost(5, TimeUnit.SECONDS)
@@ -130,7 +139,7 @@ class MqttModbusIT {
                             .isNotZero();
                 });
 
-        engine.stopFlow("mqtt-rule");
+        flowService.stopFlow("mqtt-rule");
         simulator.stop();
     }
 }
