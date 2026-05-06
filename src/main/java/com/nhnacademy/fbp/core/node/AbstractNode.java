@@ -29,6 +29,8 @@ public abstract class AbstractNode implements Node, Runnable {
         outputPorts = new HashMap<>();
 
         metricCollector = NoOpMetricCollector.get();
+
+        addOutputPort("error");
     }
 
     protected abstract void onProcess(Message message);
@@ -46,7 +48,15 @@ public abstract class AbstractNode implements Node, Runnable {
             metricCollector.recordMessage(id, duration);
         } catch (Exception e) {
             metricCollector.recordError(id);
-            throw e;
+            
+            Message errorMsg = Message.create()
+                    .withEntry("originalMessage", message.getPayload())
+                    .withEntry("exception", e.getClass().getName())
+                    .withEntry("message", e.getMessage())
+                    .withEntry("nodeId", id)
+                    .withEntry("timestamp", System.currentTimeMillis());
+            
+            send("error", errorMsg);
         }
     }
 
