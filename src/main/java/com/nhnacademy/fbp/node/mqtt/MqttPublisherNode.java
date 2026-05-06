@@ -5,6 +5,7 @@ import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.lifecycle.MqttDisconnectSource;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
+import com.hivemq.client.mqtt.mqtt5.message.connect.Mqtt5Connect;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import com.nhnacademy.fbp.common.util.JsonUtils;
 import com.nhnacademy.fbp.core.message.Message;

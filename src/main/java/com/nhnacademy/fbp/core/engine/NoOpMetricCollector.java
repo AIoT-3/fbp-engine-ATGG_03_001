@@ -14,7 +14,7 @@ public class NoOpMetricCollector implements MetricCollector {
     }
 
     @Override
-    public void record(String nodeId, long duration) {
+    public void recordMessage(String nodeId, long duration) {
 
     }
 

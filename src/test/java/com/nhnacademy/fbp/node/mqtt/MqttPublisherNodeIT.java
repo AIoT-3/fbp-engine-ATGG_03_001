@@ -9,8 +9,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @Tag("integration")
 class MqttPublisherNodeIT {
@@ -42,14 +44,14 @@ class MqttPublisherNodeIT {
     @DisplayName("노드를 초기화하면, 연결 상태가 CONNECTED가 된다.")
     void initialize_WhenCalled_ConnectionStateIsConnected() {
         // given
-        MqttPublisherNode node = MqttPublisherNode.create(UUID.randomUUID().toString(), "test", 1234, "test");
+        MqttPublisherNode node = MqttPublisherNode.create(UUID.randomUUID().toString(), "localhost", 1883, "test");
 
         // when
         node.initialize();
 
         // then
-        assertThat(node.isConnected())
-                .isTrue();
+        await().atMost(2, TimeUnit.SECONDS)
+                        .until(node::isConnected);
     }
 
     @Test

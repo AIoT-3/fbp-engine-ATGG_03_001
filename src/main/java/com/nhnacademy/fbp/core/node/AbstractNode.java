@@ -7,6 +7,8 @@ import com.nhnacademy.fbp.core.port.DefaultInputPort;
 import com.nhnacademy.fbp.core.port.DefaultOutputPort;
 import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
+import com.nhnacademy.fbp.core.port.exception.InputPortNotFoundException;
+import com.nhnacademy.fbp.core.port.exception.OutputPortNotFoundException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,7 +43,7 @@ public abstract class AbstractNode implements Node, Runnable {
 
             long duration = end - start;
 
-            metricCollector.record(id, duration);
+            metricCollector.recordMessage(id, duration);
         } catch (Exception e) {
             metricCollector.recordError(id);
             throw e;
@@ -61,10 +63,18 @@ public abstract class AbstractNode implements Node, Runnable {
     }
 
     public InputPort getInputPort(String name) {
+        if (!inputPorts.containsKey(name)) {
+            throw new InputPortNotFoundException();
+        }
+
         return inputPorts.get(name);
     }
 
     public OutputPort getOutputPort(String name) {
+        if (!outputPorts.containsKey(name)) {
+            throw new OutputPortNotFoundException();
+        }
+
         return outputPorts.get(name);
     }
 

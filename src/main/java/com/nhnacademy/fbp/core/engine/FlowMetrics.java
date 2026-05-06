@@ -18,7 +18,7 @@ public class FlowMetrics implements MetricCollector {
     }
 
     @Override
-    public void record(String nodeId, long duration) {
+    public void recordMessage(String nodeId, long duration) {
         registry.computeIfAbsent(nodeId, k -> NodeMetrics.create()).record(duration);
         summary.record(duration);
     }

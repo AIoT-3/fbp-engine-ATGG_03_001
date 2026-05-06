@@ -8,8 +8,6 @@ import com.nhnacademy.fbp.core.node.AbstractNode;
 import com.nhnacademy.fbp.core.node.exception.NodeNotFoundException;
 import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
-import com.nhnacademy.fbp.core.port.exception.InputPortNotFoundException;
-import com.nhnacademy.fbp.core.port.exception.OutputPortNotFoundException;
 import lombok.Getter;
 
 import java.util.*;
@@ -54,21 +52,9 @@ public class Flow {
 
         OutputPort sourceOutput = source.getOutputPort(srcPort);
 
-        if (sourceOutput == null) {
-            throw new OutputPortNotFoundException();
-        }
-
         InputPort targetInput = target.getInputPort(tgtPort);
 
-        if (targetInput == null) {
-            throw new InputPortNotFoundException();
-        }
-
-        String connectionId = String.format("%s:%s->%s:%s", srcId, srcPort, tgtId, tgtPort);
-        Connection connection = Connection.create(connectionId);
-
-        sourceOutput.connect(connection);
-        connection.setTarget(targetInput);
+        Connection connection = Connection.connect(srcId, sourceOutput, tgtId, targetInput);
 
         connections.add(connection);
 

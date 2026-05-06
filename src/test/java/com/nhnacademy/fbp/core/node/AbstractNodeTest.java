@@ -3,10 +3,13 @@ package com.nhnacademy.fbp.core.node;
 import com.nhnacademy.fbp.core.message.Message;
 import com.nhnacademy.fbp.core.port.InputPort;
 import com.nhnacademy.fbp.core.port.OutputPort;
+import com.nhnacademy.fbp.core.port.exception.InputPortNotFoundException;
+import com.nhnacademy.fbp.core.port.exception.OutputPortNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.spy;
 
@@ -74,17 +77,25 @@ class AbstractNodeTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 포트 이름으로 조회하면 null이 반환된다.")
-    void getInputPort_WhenNotExists_ReturnsNull() {
+    @DisplayName("존재하지 않는 입력 포트 이름으로 조회하면 InputPortNotFoundException이 발생한다.")
+    void getInputPort_WhenNotExists_ThrowsException() {
         // given
         AbstractNode node = AbstractNodeFixture.defaultNode();
 
-        // when
-        InputPort inputPort = node.getInputPort("non-existent-node");
+        // when & then
+        assertThatThrownBy(() -> node.getInputPort("not-found"))
+                .isInstanceOf(InputPortNotFoundException.class);
+    }
 
-        // then
-        assertThat(inputPort)
-                .isNull();
+    @Test
+    @DisplayName("존재하지 않는 출력 포트 이름으로 조회하면 OutputPortNotFoundException이 발생한다.")
+    void getOutputPort_WhenNotExists_ThrowsException() {
+        // given
+        AbstractNode node = AbstractNodeFixture.defaultNode();
+
+        // when & then
+        assertThatThrownBy(() -> node.getOutputPort("not-found"))
+                .isInstanceOf(OutputPortNotFoundException.class);
     }
 
     @Test
